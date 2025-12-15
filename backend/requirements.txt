@@ -6,3 +6,4 @@ django-filter>=23.5
 python-dotenv>=1.0
 pillow>=10.0
 reportlab>=4.0
+weasyprint==62.3

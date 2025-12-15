@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @font-face {
+            font-family: 'Quicksand';
+            src: url('file://{{ font_path }}/Quicksand-Regular.ttf');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Quicksand';
+            src: url('file://{{ font_path }}/Quicksand-Bold.ttf');
+            font-weight: 700;
+        }
+        @font-face {
+            font-family: 'Quicksand';
+            src: url('file://{{ font_path }}/Quicksand-Medium.ttf');
+            font-weight: 500;
+        }
+        @font-face {
+            font-family: 'Quicksand';
+            src: url('file://{{ font_path }}/Quicksand-Light.ttf');
+            font-weight: 300;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 11pt;
+            color: #333333;
+            line-height: 1.5;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            position: relative;
+        }
+
+        /* Header Band */
+        .header {
+            background: #D4C4B0;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .facture-title {
+            font-family: 'Times New Roman', Georgia, serif;
+            font-size: 48pt;
+            font-weight: bold;
+            color: #1a1a2e;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            width: 120px;
+            height: 120px;
+            background: #2A7B88;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            filter: brightness(0) invert(1);
+        }
+
+        /* Content Area */
+        .content {
+            padding: 35px 40px;
+            min-height: 500px;
+        }
+
+        /* Client Info Section */
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 35px;
+        }
+
+        .client-info {
+            flex: 1;
+        }
+
+        .client-info h3 {
+            font-size: 13pt;
+            font-weight: 500;
+            text-decoration: underline;
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .client-info p {
+            margin: 4px 0;
+            font-size: 11pt;
+        }
+
+        .client-info .company-name {
+            font-weight: 700;
+            font-size: 12pt;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-meta p {
+            margin: 6px 0;
+            font-size: 11pt;
+        }
+
+        .invoice-meta strong {
+            font-weight: 600;
+        }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+        }
+
+        .items-table th {
+            border-bottom: 2px solid #333;
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11pt;
+        }
+
+        .items-table th.center {
+            text-align: center;
+        }
+
+        .items-table td {
+            padding: 18px 8px;
+            vertical-align: top;
+            font-size: 11pt;
+        }
+
+        .items-table td.center {
+            text-align: center;
+        }
+
+        .item-title {
+            font-weight: 600;
+            font-size: 12pt;
+            color: #333;
+        }
+
+        .item-description {
+            font-size: 10pt;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .table-divider {
+            border-top: 1px solid #333;
+            margin: 8px 0;
+        }
+
+        /* Note and Total Section */
+        .bottom-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin: 50px 0 30px 0;
+        }
+
+        .note-box {
+            max-width: 50%;
+            font-size: 10pt;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        .note-box p {
+            margin-bottom: 12px;
+        }
+
+        .total-box {
+            border: 2px solid #2A7B88;
+            padding: 18px 30px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .total-label {
+            color: #2A7B88;
+            font-size: 12pt;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .total-amount {
+            font-size: 22pt;
+            font-weight: 700;
+            color: #2A7B88;
+        }
+
+        /* Seller Footer Info */
+        .seller-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 1px solid #ccc;
+        }
+
+        .seller-info {
+            font-size: 10pt;
+        }
+
+        .seller-info p {
+            margin: 3px 0;
+        }
+
+        .seller-info .name {
+            font-weight: 700;
+            font-size: 11pt;
+        }
+
+        .stamp-box {
+            border: 2px solid #2A7B88;
+            border-radius: 6px;
+            padding: 12px 20px;
+            text-align: center;
+            color: #2A7B88;
+        }
+
+        .stamp-name {
+            font-size: 14pt;
+            font-weight: 700;
+        }
+
+        .stamp-title {
+            font-size: 9pt;
+            margin: 4px 0;
+        }
+
+        .stamp-details {
+            font-size: 9pt;
+        }
+
+        /* Bank Footer */
+        .bank-footer {
+            background: #D4C4B0;
+            padding: 20px 40px;
+            text-align: center;
+            font-size: 10pt;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .bank-footer p {
+            margin: 3px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="facture-title">FACTURE</div>
+            <div class="logo-container">
+                <img src="file://{{ logo_path }}" alt="Logo">
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <!-- Client and Invoice Info -->
+            <div class="info-section">
+                <div class="client-info">
+                    <h3>Facture à :</h3>
+                    <p class="company-name">{{ client.company|default:client.name }}</p>
+                    {% if client.address_line1 %}<p>{{ client.address_line1 }}</p>{% endif %}
+                    {% if client.address_line2 %}<p>{{ client.address_line2 }}</p>{% endif %}
+                    {% if client.ice_number %}<p>ICE : {{ client.ice_number }}</p>{% endif %}
+                </div>
+                <div class="invoice-meta">
+                    <p>Facture n° : <strong>{{ invoice.invoice_number }}</strong></p>
+                    <p>En date du : <strong>{{ invoice.issued_date|date:"d-m-Y" }}</strong></p>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Description</th>
+                        <th class="center" style="width: 15%;">Quantité</th>
+                        <th class="center" style="width: 15%;">TVA</th>
+                        <th class="center" style="width: 20%;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <div class="item-title">{{ item.title|default:item.description }}</div>
+                            {% if item.subtitle %}<div class="item-description">{{ item.subtitle }}</div>{% endif %}
+                        </td>
+                        <td class="center">{{ item.quantity }}</td>
+                        <td class="center">{{ invoice.tva_rate|floatformat:0 }}%</td>
+                        <td class="center">{{ item.total_price|floatformat:0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="table-divider"></div>
+            <div class="table-divider"></div>
+
+            <!-- Note and Total -->
+            <div class="bottom-section">
+                <div class="note-box">
+                    {% if invoice.deposit_amount %}
+                    <p>Note : Un acompte de {{ invoice.deposit_amount|floatformat:0 }} MAD sera versé titre d'avance sur la facture d'un montant total de {{ invoice.total_amount|floatformat:0 }} MAD.</p>
+                    <p>Le solde de {{ remaining_amount|floatformat:0 }} MAD sera réglé à la livraison de la prestation.</p>
+                    {% elif invoice.notes %}
+                    <p>{{ invoice.notes }}</p>
+                    {% endif %}
+                </div>
+                <div class="total-box">
+                    <div class="total-label">Total à payer HT</div>
+                    <div class="total-amount">{{ invoice.total_amount|floatformat:0 }} dhs</div>
+                </div>
+            </div>
+
+            <!-- Seller Info -->
+            <div class="seller-section">
+                <div class="seller-info">
+                    <p class="name">Soufian Bouhrara</p>
+                    <p>ICE : 003747242000025</p>
+                    <p>+212 724216096</p>
+                </div>
+                <div class="stamp-box">
+                    <div class="stamp-name">Soufian BOUHRARA</div>
+                    <div class="stamp-title">Auto-Entrepreneur</div>
+                    <div class="stamp-details">ICE: 003747242000025</div>
+                    <div class="stamp-details">Tél: 07 24 21 60 96</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bank Footer -->
+        <div class="bank-footer">
+            <p>Compte bancaire : Al Barid Bank</p>
+            <p>Titulaire : BOUHRARA SOUFIAN</p>
+            <p>RIB : 350810000000001304811290</p>
+            <p>IBAN : MA64 350 810 0000000013048112 90</p>
+        </div>
+    </div>
+</body>
+</html>

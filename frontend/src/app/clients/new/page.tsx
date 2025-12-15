@@ -19,7 +19,13 @@ import {
   FileText,
   Loader2,
   CheckCircle2,
+  AlertCircle,
+  Wifi,
+  Clock,
+  Server,
+  ShieldAlert,
 } from 'lucide-react'
+import { categorizeError, CategorizedError } from '@/services/api'
 
 // Validation schema
 const clientSchema = z.object({
@@ -36,6 +42,7 @@ export default function NewClientPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [showSuccess, setShowSuccess] = useState(false)
+  const [errorDetails, setErrorDetails] = useState<CategorizedError | null>(null)
 
   const {
     register,
@@ -57,10 +64,14 @@ export default function NewClientPage() {
     mutationFn: (data: ClientFormData) => clientsService.create(data),
     onSuccess: (newClient) => {
       queryClient.invalidateQueries({ queryKey: ['clients'] })
+      setErrorDetails(null)
       setShowSuccess(true)
       setTimeout(() => {
         router.push(`/clients/${newClient.id}`)
       }, 1500)
+    },
+    onError: (error) => {
+      setErrorDetails(categorizeError(error))
     },
   })
 
@@ -226,16 +237,46 @@ export default function NewClientPage() {
           </div>
 
           {/* Error message */}
-          {createMutation.isError && (
-            <div className="rounded-xl bg-destructive/10 border border-destructive/30 p-4">
-              <p className="text-destructive text-sm font-medium">
-                Failed to create client
-              </p>
-              <p className="text-destructive/80 text-xs mt-1">
-                {(createMutation.error as Error & { response?: { data?: { detail?: string } } })?.response?.data?.detail
-                  || (createMutation.error as Error)?.message
-                  || 'Please check if the backend server is running.'}
-              </p>
+          {createMutation.isError && errorDetails && (
+            <div className="rounded-xl bg-destructive/10 border border-destructive/30 p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                {errorDetails.type === 'network' && <Wifi className="w-4 h-4 text-destructive" />}
+                {errorDetails.type === 'timeout' && <Clock className="w-4 h-4 text-destructive" />}
+                {errorDetails.type === 'server' && <Server className="w-4 h-4 text-destructive" />}
+                {errorDetails.type === 'validation' && <AlertCircle className="w-4 h-4 text-destructive" />}
+                {errorDetails.type === 'auth' && <ShieldAlert className="w-4 h-4 text-destructive" />}
+                {(errorDetails.type === 'cors' || errorDetails.type === 'unknown') && <AlertCircle className="w-4 h-4 text-destructive" />}
+                <p className="text-destructive font-medium">
+                  {errorDetails.type === 'network' && 'Connection Error'}
+                  {errorDetails.type === 'timeout' && 'Request Timeout'}
+                  {errorDetails.type === 'server' && 'Server Error'}
+                  {errorDetails.type === 'validation' && 'Validation Error'}
+                  {errorDetails.type === 'auth' && 'Authentication Error'}
+                  {errorDetails.type === 'cors' && 'Connection Blocked'}
+                  {errorDetails.type === 'unknown' && 'Error'}
+                </p>
+              </div>
+              <p className="text-destructive/80 text-sm">{errorDetails.message}</p>
+              {errorDetails.details && (
+                <details className="text-xs">
+                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                    Technical details
+                  </summary>
+                  <pre className="mt-2 p-2 bg-muted/50 rounded-lg overflow-auto text-muted-foreground">
+                    {errorDetails.details}
+                  </pre>
+                </details>
+              )}
+              {errorDetails.type === 'network' && (
+                <div className="text-xs text-muted-foreground border-t border-border/50 pt-3 mt-2">
+                  <p className="font-medium mb-1">Troubleshooting:</p>
+                  <ol className="list-decimal list-inside space-y-1">
+                    <li>Verify Django is running: <code className="bg-muted px-1 rounded">python manage.py runserver</code></li>
+                    <li>Check it&apos;s on port 8000: <code className="bg-muted px-1 rounded">http://localhost:8000/api/</code></li>
+                    <li>Restart Next.js after any .env changes</li>
+                  </ol>
+                </div>
+              )}
             </div>
           )}
 

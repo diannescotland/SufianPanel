@@ -36,31 +36,31 @@ export default function DashboardPage() {
       value: formatCurrency(overview?.total_revenue || 0),
       change: overview?.revenue_change || 0,
       icon: DollarSign,
-      color: 'from-emerald-500 to-teal-500',
-      bgGlow: 'bg-emerald-500/20',
+      color: 'bg-primary',
+      bgGlow: 'bg-primary/20',
     },
     {
       label: 'Active Clients',
       value: overview?.active_clients || 0,
       icon: Users,
-      color: 'from-blue-500 to-cyan-500',
-      bgGlow: 'bg-blue-500/20',
+      color: 'bg-secondary',
+      bgGlow: 'bg-secondary/20',
     },
     {
       label: 'Pending Invoices',
       value: overview?.pending_invoices || 0,
       subValue: formatCurrency(overview?.pending_amount || 0),
       icon: FileText,
-      color: 'from-amber-500 to-orange-500',
-      bgGlow: 'bg-amber-500/20',
+      color: 'bg-chart-2',
+      bgGlow: 'bg-chart-2/20',
     },
     {
       label: 'Overdue Payments',
       value: overview?.overdue_invoices || 0,
       subValue: formatCurrency(overview?.overdue_amount || 0),
       icon: AlertCircle,
-      color: 'from-rose-500 to-pink-500',
-      bgGlow: 'bg-rose-500/20',
+      color: 'bg-destructive',
+      bgGlow: 'bg-destructive/20',
       alert: (overview?.overdue_invoices || 0) > 0,
     },
   ]
@@ -103,17 +103,17 @@ export default function DashboardPage() {
                 <div className="relative">
                   <div className="flex items-start justify-between mb-4">
                     <div className={cn(
-                      'p-2.5 rounded-xl bg-gradient-to-br shadow-lg',
+                      'p-2.5 rounded-xl shadow-lg',
                       stat.color
                     )}>
-                      <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+                      <Icon className="w-5 h-5 text-primary-foreground" strokeWidth={2} />
                     </div>
                     {stat.change !== undefined && (
                       <div className={cn(
                         'flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium',
                         stat.change >= 0
-                          ? 'bg-emerald-500/10 text-emerald-500'
-                          : 'bg-rose-500/10 text-rose-500'
+                          ? 'bg-primary/10 text-primary'
+                          : 'bg-destructive/10 text-destructive'
                       )}>
                         {stat.change >= 0 ? (
                           <TrendingUp className="w-3 h-3" />
@@ -246,8 +246,8 @@ export default function DashboardPage() {
             {/* Projects this month */}
             <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-5">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-purple-500/10">
-                  <FolderKanban className="w-4 h-4 text-purple-500" />
+                <div className="p-2 rounded-lg bg-secondary/10">
+                  <FolderKanban className="w-4 h-4 text-secondary" />
                 </div>
                 <h3 className="font-semibold text-foreground">Projects This Month</h3>
               </div>
@@ -260,12 +260,12 @@ export default function DashboardPage() {
             </div>
 
             {/* Quick actions */}
-            <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/10 to-pink-500/10 border border-primary/20 p-5">
+            <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-5">
               <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
               <div className="space-y-2">
                 <Link
                   href="/clients/new"
-                  className="flex items-center gap-3 p-3 rounded-xl bg-background/50 hover:bg-background/80 transition-colors group"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                     <Users className="w-4 h-4 text-primary" />
@@ -274,19 +274,19 @@ export default function DashboardPage() {
                 </Link>
                 <Link
                   href="/projects/new"
-                  className="flex items-center gap-3 p-3 rounded-xl bg-background/50 hover:bg-background/80 transition-colors group"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-                    <FolderKanban className="w-4 h-4 text-purple-500" />
+                  <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                    <FolderKanban className="w-4 h-4 text-secondary" />
                   </div>
                   <span className="text-sm font-medium text-foreground">Create Project</span>
                 </Link>
                 <Link
                   href="/invoices/new"
-                  className="flex items-center gap-3 p-3 rounded-xl bg-background/50 hover:bg-background/80 transition-colors group"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors">
-                    <FileText className="w-4 h-4 text-emerald-500" />
+                  <div className="w-8 h-8 rounded-lg bg-chart-2/10 flex items-center justify-center group-hover:bg-chart-2/20 transition-colors">
+                    <FileText className="w-4 h-4 text-chart-2" />
                   </div>
                   <span className="text-sm font-medium text-foreground">New Invoice</span>
                 </Link>

@@ -367,7 +367,7 @@ export default function NewInvoicePage() {
                     {/* Unit Price */}
                     <div className="col-span-2">
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">MAD</span>
                         <input
                           {...register(`items.${index}.unit_price`, { valueAsNumber: true })}
                           type="number"
@@ -375,7 +375,7 @@ export default function NewInvoicePage() {
                           step="0.01"
                           placeholder="0.00"
                           className={cn(
-                            'w-full pl-7 pr-3 py-2.5 rounded-xl',
+                            'w-full pl-12 pr-3 py-2.5 rounded-xl',
                             'bg-secondary/50 border border-border/50',
                             'text-foreground text-sm',
                             'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50'

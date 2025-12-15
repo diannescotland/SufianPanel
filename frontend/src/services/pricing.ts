@@ -24,8 +24,8 @@ export interface CostCalculatorResponse {
 
 export const pricingService = {
   getAll: async () => {
-    const response = await api.get<ServicePricing[]>('/pricing/')
-    return response.data
+    const response = await api.get<{ results: ServicePricing[] }>('/pricing/')
+    return response.data.results
   },
 
   getById: async (id: string) => {

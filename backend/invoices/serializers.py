@@ -5,7 +5,7 @@ from .models import Invoice, InvoiceItem, Payment
 class InvoiceItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvoiceItem
-        fields = ['id', 'service', 'description', 'quantity', 'unit_price', 'total_price']
+        fields = ['id', 'service', 'title', 'description', 'quantity', 'unit_price', 'total_price']
         read_only_fields = ['id', 'total_price']
 
 
@@ -26,6 +26,8 @@ class InvoiceSerializer(serializers.ModelSerializer):
     project_title = serializers.CharField(source='project.title', read_only=True)
     payment_status_display = serializers.CharField(source='get_payment_status_display', read_only=True)
     amount_remaining = serializers.ReadOnlyField()
+    tva_amount = serializers.ReadOnlyField()
+    total_with_tva = serializers.ReadOnlyField()
     is_overdue = serializers.ReadOnlyField()
     items = InvoiceItemSerializer(many=True, read_only=True)
     payments = PaymentSerializer(many=True, read_only=True)
@@ -34,9 +36,10 @@ class InvoiceSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = [
             'id', 'invoice_number', 'project', 'project_title', 'client', 'client_name',
-            'total_amount', 'amount_paid', 'amount_remaining', 'payment_status',
-            'payment_status_display', 'due_date', 'issued_date', 'notes', 'pdf_file',
-            'is_overdue', 'items', 'payments'
+            'total_amount', 'amount_paid', 'amount_remaining', 'deposit_amount',
+            'tva_rate', 'tva_amount', 'total_with_tva',
+            'payment_status', 'payment_status_display', 'due_date', 'issued_date',
+            'notes', 'pdf_file', 'is_overdue', 'items', 'payments'
         ]
         read_only_fields = ['id', 'invoice_number', 'issued_date', 'amount_paid']
 
@@ -53,8 +56,8 @@ class InvoiceListSerializer(serializers.ModelSerializer):
         model = Invoice
         fields = [
             'id', 'invoice_number', 'client_name', 'project_title', 'total_amount',
-            'amount_paid', 'amount_remaining', 'payment_status', 'payment_status_display',
-            'due_date', 'issued_date', 'is_overdue'
+            'amount_paid', 'amount_remaining', 'deposit_amount', 'tva_rate',
+            'payment_status', 'payment_status_display', 'due_date', 'issued_date', 'is_overdue'
         ]
 
 
@@ -65,7 +68,8 @@ class InvoiceCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = [
-            'project', 'client', 'total_amount', 'due_date', 'notes', 'items'
+            'project', 'client', 'total_amount', 'deposit_amount', 'tva_rate',
+            'due_date', 'notes', 'items'
         ]
 
     def create(self, validated_data):

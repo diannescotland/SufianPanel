@@ -70,9 +70,22 @@ export default function InvoiceDetailPage() {
     })
   }
 
-  const handleDownloadPdf = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api'
-    window.open(`${apiUrl}/invoices/${invoiceId}/pdf/`, '_blank')
+  const handleDownloadPdf = async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+    try {
+      const response = await fetch(`${apiUrl}/invoices/${invoiceId}/download_pdf/`)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${invoice?.invoice_number || 'invoice'}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Failed to download PDF:', error)
+    }
   }
 
   if (isLoading) {

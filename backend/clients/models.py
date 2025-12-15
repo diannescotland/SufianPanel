@@ -3,13 +3,26 @@ from django.db import models
 
 
 class Client(models.Model):
-    """Model for storing client information."""
+    """Model for storing client information - Moroccan format."""
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
     company = models.CharField(max_length=255, blank=True, null=True)
+
+    # Moroccan business fields
+    ice_number = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        verbose_name="ICE",
+        help_text="Identifiant Commun de l'Entreprise"
+    )
+    address_line1 = models.CharField(max_length=255, blank=True, null=True)
+    address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

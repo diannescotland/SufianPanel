@@ -120,12 +120,12 @@ export default function ClientsPage() {
                 {/* Status indicator */}
                 <div className={cn(
                   'absolute top-4 right-4 w-2 h-2 rounded-full',
-                  client.is_active ? 'bg-emerald-500' : 'bg-muted-foreground/30'
+                  client.is_active ? 'bg-primary' : 'bg-muted-foreground/30'
                 )} />
 
                 <div className="flex items-start gap-4">
                   {/* Avatar */}
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/80 to-purple-500/80 flex items-center justify-center text-white font-semibold shadow-lg shadow-primary/20">
+                  <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-semibold shadow-lg shadow-primary/20">
                     {getInitials(client.name)}
                   </div>
 

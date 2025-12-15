@@ -1,27 +1,48 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+from django.db import transaction
 from clients.models import Client
 from projects.models import Project
 from services.models import Service
 
 
 class Invoice(models.Model):
-    """Model for invoices."""
+    """Model for invoices - Moroccan format with MAD currency."""
 
     PAYMENT_STATUS = [
-        ('unpaid', 'Unpaid'),
-        ('partial', 'Partially Paid'),
-        ('paid', 'Paid'),
-        ('overdue', 'Overdue'),
+        ('unpaid', 'Non payé'),
+        ('partial', 'Partiellement payé'),
+        ('paid', 'Payé'),
+        ('overdue', 'En retard'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    invoice_number = models.CharField(max_length=50, unique=True)
+    invoice_number = models.CharField(max_length=50, unique=True, blank=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='invoices')
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='invoices')
+
+    # Amounts in MAD
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Deposit (Acompte)
+    deposit_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Acompte en MAD"
+    )
+
+    # TVA - default 0% for auto-entrepreneur
+    tva_rate = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        help_text="Taux TVA en % (0 par défaut)"
+    )
+
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default='unpaid')
     due_date = models.DateField()
     issued_date = models.DateField(auto_now_add=True)
@@ -30,6 +51,11 @@ class Invoice(models.Model):
 
     class Meta:
         ordering = ['-issued_date']
+        indexes = [
+            models.Index(fields=['payment_status']),
+            models.Index(fields=['due_date']),
+            models.Index(fields=['client', 'payment_status']),
+        ]
 
     def __str__(self):
         return f"{self.invoice_number} - {self.client.name}"
@@ -37,6 +63,18 @@ class Invoice(models.Model):
     @property
     def amount_remaining(self):
         return self.total_amount - self.amount_paid
+
+    @property
+    def tva_amount(self):
+        """Calculate TVA amount."""
+        if self.tva_rate > 0:
+            return (self.total_amount * self.tva_rate) / 100
+        return 0
+
+    @property
+    def total_with_tva(self):
+        """Total including TVA."""
+        return self.total_amount + self.tva_amount
 
     @property
     def is_overdue(self):
@@ -57,20 +95,23 @@ class Invoice(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        # Generate invoice number if not set
+        # Generate invoice number if not set (format: SB6-XX)
         if not self.invoice_number:
-            year = timezone.now().year
-            last_invoice = Invoice.objects.filter(
-                invoice_number__startswith=f'INV-{year}'
-            ).order_by('-invoice_number').first()
+            with transaction.atomic():
+                last_invoice = Invoice.objects.select_for_update().filter(
+                    invoice_number__startswith='SB6-'
+                ).order_by('-invoice_number').first()
 
-            if last_invoice:
-                last_num = int(last_invoice.invoice_number.split('-')[-1])
-                new_num = last_num + 1
-            else:
-                new_num = 1
+                if last_invoice:
+                    try:
+                        last_num = int(last_invoice.invoice_number.split('-')[1])
+                        new_num = last_num + 1
+                    except (ValueError, IndexError):
+                        new_num = 1
+                else:
+                    new_num = 1
 
-            self.invoice_number = f'INV-{year}-{new_num:05d}'
+                self.invoice_number = f'SB6-{new_num}'
 
         super().save(*args, **kwargs)
 
@@ -81,13 +122,17 @@ class InvoiceItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, blank=True)
-    description = models.CharField(max_length=255)
+
+    # Title and description (Title = main line, description = subtitle)
+    title = models.CharField(max_length=255, default='', help_text="Titre principal (ex: Campagne ADS)")
+    description = models.CharField(max_length=500, blank=True, help_text="Sous-titre/description")
+
     quantity = models.IntegerField(default=1)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.description} - {self.invoice.invoice_number}"
+        return f"{self.title} - {self.invoice.invoice_number}"
 
     def save(self, *args, **kwargs):
         self.total_price = self.quantity * self.unit_price
@@ -98,11 +143,11 @@ class Payment(models.Model):
     """Model for recording payments."""
 
     PAYMENT_METHODS = [
-        ('cash', 'Cash'),
-        ('bank_transfer', 'Bank Transfer'),
+        ('cash', 'Espèces'),
+        ('bank_transfer', 'Virement bancaire'),
         ('paypal', 'PayPal'),
         ('stripe', 'Stripe'),
-        ('other', 'Other'),
+        ('other', 'Autre'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -117,7 +162,7 @@ class Payment(models.Model):
         ordering = ['-payment_date']
 
     def __str__(self):
-        return f"Payment of ${self.amount} for {self.invoice.invoice_number}"
+        return f"Paiement de {self.amount} MAD pour {self.invoice.invoice_number}"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

@@ -8,7 +8,6 @@ import {
   Bell,
   Sun,
   Moon,
-  Monitor,
   Menu,
   User,
   LogOut,
@@ -22,15 +21,8 @@ interface HeaderProps {
 }
 
 export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme()
-  const [showThemeMenu, setShowThemeMenu] = useState(false)
+  const { setTheme, resolvedTheme } = useTheme()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
-
-  const themeOptions = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Monitor },
-  ] as const
 
   return (
     <header
@@ -86,58 +78,16 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
           </button>
 
           {/* Theme toggle */}
-          <div className="relative">
-            <button
-              onClick={() => setShowThemeMenu(!showThemeMenu)}
-              className="p-2.5 rounded-xl hover:bg-secondary transition-colors group"
-            >
-              {resolvedTheme === 'dark' ? (
-                <Moon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-              ) : (
-                <Sun className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-              )}
-            </button>
-
-            {showThemeMenu && (
-              <>
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowThemeMenu(false)}
-                />
-                <div className={cn(
-                  'absolute right-0 top-full mt-2 z-50 w-40',
-                  'bg-card/95 backdrop-blur-xl rounded-xl',
-                  'border border-border/50 shadow-xl shadow-black/20',
-                  'py-1.5 animate-in fade-in slide-in-from-top-2 duration-200'
-                )}>
-                  {themeOptions.map((option) => {
-                    const Icon = option.icon
-                    const isActive = theme === option.value
-                    return (
-                      <button
-                        key={option.value}
-                        onClick={() => {
-                          setTheme(option.value)
-                          setShowThemeMenu(false)
-                        }}
-                        className={cn(
-                          'w-full flex items-center gap-3 px-3 py-2 text-sm',
-                          'hover:bg-secondary/50 transition-colors',
-                          isActive ? 'text-primary' : 'text-muted-foreground'
-                        )}
-                      >
-                        <Icon className="w-4 h-4" />
-                        <span>{option.label}</span>
-                        {isActive && (
-                          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </>
+          <button
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+            className="p-2.5 rounded-xl hover:bg-secondary transition-colors group"
+          >
+            {resolvedTheme === 'dark' ? (
+              <Moon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+            ) : (
+              <Sun className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
             )}
-          </div>
+          </button>
 
           {/* Divider */}
           <div className="w-px h-8 bg-border/50 mx-2" />
@@ -151,8 +101,8 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
                 'hover:bg-secondary transition-colors group'
               )}
             >
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-primary/20">
-                <span className="text-sm font-semibold text-white">A</span>
+              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <span className="text-sm font-semibold text-primary-foreground">A</span>
               </div>
               <div className="text-left hidden sm:block">
                 <p className="text-sm font-medium text-foreground">Admin</p>

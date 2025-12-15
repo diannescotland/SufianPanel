@@ -5,6 +5,11 @@ export interface Client {
   email: string
   phone: string
   company: string | null
+  // Moroccan business fields
+  ice_number: string | null
+  address_line1: string | null
+  address_line2: string | null
+  city: string | null
   notes: string | null
   created_at: string
   updated_at: string
@@ -45,6 +50,7 @@ export type PaymentMethod = 'cash' | 'bank_transfer' | 'paypal' | 'stripe' | 'ot
 export interface InvoiceItem {
   id: string
   service: string | null
+  title: string
   description: string
   quantity: number
   unit_price: number
@@ -72,6 +78,11 @@ export interface Invoice {
   total_amount: number
   amount_paid: number
   amount_remaining?: number
+  // Moroccan invoice fields
+  deposit_amount: number | null
+  tva_rate: number
+  tva_amount?: number
+  total_with_tva?: number
   payment_status: PaymentStatus
   payment_status_display?: string
   due_date: string
@@ -196,4 +207,106 @@ export interface User {
   id: number
   username: string
   email: string
+}
+
+// Subscription Types (Credit Tracking)
+export type ToolType = 'image' | 'video' | 'audio' | 'both'
+export type PricingModel = 'monthly' | 'credits' | 'per_use'
+export type GenerationType = 'image' | 'video' | 'audio' | 'other'
+
+export interface AITool {
+  id: string
+  name: string
+  display_name: string
+  tool_type: ToolType
+  pricing_model: PricingModel
+  default_monthly_cost_mad: number
+  default_credits_per_month: number
+  default_cost_per_image_mad: number
+  default_cost_per_video_second_mad: number
+  icon: string
+  is_active: boolean
+}
+
+export interface Subscription {
+  id: string
+  tool: string
+  tool_name?: string
+  tool_type?: ToolType
+  billing_month: string
+  total_cost_mad: number
+  original_amount?: number | null
+  original_currency: string
+  exchange_rate?: number | null
+  total_credits?: number | null
+  credits_remaining?: number | null
+  cost_per_credit_mad?: number | null
+  credits_used?: number
+  notes: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreditUsage {
+  id: string
+  subscription: string
+  tool_name?: string
+  client: string
+  client_name?: string
+  project?: string | null
+  project_title?: string | null
+  generation_type: GenerationType
+  credits_used: number
+  items_generated: number
+  video_seconds: number
+  calculated_cost_mad: number
+  manual_cost_mad?: number | null
+  final_cost_mad?: number
+  description: string
+  usage_date: string
+  created_at: string
+}
+
+export interface ClientServiceSelection {
+  id: string
+  client: string
+  tool: string
+  tool_name?: string
+  tool_type?: ToolType
+  is_active: boolean
+  added_at: string
+  notes: string
+}
+
+export interface ClientCostSummary {
+  client_id: string
+  client_name: string
+  company?: string | null
+  total_cost_mad: number
+  total_credits_used: number
+  total_items_generated: number
+  breakdown_by_tool: {
+    tool_name: string
+    cost_mad: number
+    credits: number
+    items: number
+  }[]
+}
+
+export interface MonthlyOverview {
+  month: string
+  month_key: string
+  total_cost_mad: number
+  subscriptions: {
+    tool: string
+    tool_type: ToolType
+    cost_mad: number
+    original_amount?: number | null
+    original_currency: string
+    credits_total?: number | null
+    credits_used: number
+    credits_remaining?: number | null
+    cost_per_credit_mad?: number | null
+  }[]
 }
