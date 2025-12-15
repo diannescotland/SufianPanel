@@ -226,3 +226,58 @@ body {
     letter-spacing: var(--tracking-normal);
   }
 }
+
+/* Select/Dropdown styling for theme consistency */
+select {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border);
+  color-scheme: light dark;
+}
+
+select option {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  padding: 8px 12px;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: var(--accent) !important;
+  color: var(--accent-foreground) !important;
+}
+
+/* Dark mode specific fixes for native select dropdowns */
+.dark select {
+  background-color: hsl(240 6% 20%) !important;
+  color: hsl(0 0% 90%) !important;
+  color-scheme: dark;
+}
+
+.dark select option {
+  background-color: hsl(240 6% 15%) !important;
+  color: hsl(0 0% 90%) !important;
+}
+
+.dark select option:checked {
+  background-color: hsl(240 6% 30%) !important;
+}
+
+/* Light mode select */
+:root select {
+  background-color: hsl(240 5% 96%) !important;
+  color: hsl(240 10% 10%) !important;
+}
+
+:root select option {
+  background-color: hsl(0 0% 100%) !important;
+  color: hsl(240 10% 10%) !important;
+}
+
+/* Input and select focus states */
+select:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--ring) 20%, transparent);
+}
