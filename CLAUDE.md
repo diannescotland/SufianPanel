@@ -28,19 +28,54 @@ backend/
 ├── invoices/         # Invoices, payments, PDF generation
 ├── services/         # Service pricing
 ├── analytics/        # Dashboard analytics
-├── subscriptions/    # AI tool credit tracking (NEW)
+├── subscriptions/    # AI tool credit tracking
 └── static/
     ├── images/logo.svg
-    └── fonts/        # Quicksand fonts (for WeasyPrint)
+    └── fonts/        # Quicksand fonts (Quicksand-Regular.ttf, etc.)
 
 frontend/src/
-├── app/              # Next.js pages
-├── components/       # UI components
-├── services/         # API clients
+├── app/
+│   ├── clients/      # Client pages
+│   ├── projects/     # Project pages
+│   ├── invoices/     # Invoice pages
+│   ├── subscriptions/# Subscription & usage tracking pages
+│   ├── calculator/   # Pricing calculator
+│   ├── analytics/    # Analytics dashboard
+│   └── settings/     # Settings page
+├── components/
+│   └── layout/       # Sidebar, Header, DashboardLayout
+├── services/         # API clients (clients.ts, invoices.ts, subscriptions.ts, etc.)
 ├── providers/        # React Query, Theme
 ├── types/index.ts    # TypeScript interfaces
 └── lib/utils.ts      # Helpers
+
+Root files:
+├── start.bat         # One-click start (Windows)
+├── stop.bat          # Stop all services (Windows)
+└── SB LOGO 4.4.svg   # Main logo
 ```
+
+---
+
+## Frontend Pages
+
+| Route | Description |
+|-------|-------------|
+| `/` | Dashboard with stats, deadlines, quick actions |
+| `/clients` | Client list with search, filter |
+| `/clients/new` | Create new client |
+| `/clients/[id]` | Client detail + history |
+| `/projects` | Project list |
+| `/projects/new` | Create new project |
+| `/projects/[id]` | Project detail |
+| `/invoices` | Invoice list |
+| `/invoices/new` | Create invoice with line items |
+| `/invoices/[id]` | Invoice detail + PDF download |
+| `/subscriptions` | AI tool subscriptions, monthly costs, usage by client |
+| `/subscriptions/usage` | Usage history with filters |
+| `/calculator` | Pricing calculator |
+| `/analytics` | Revenue, clients, services analytics |
+| `/settings` | App settings |
 
 ---
 
@@ -196,28 +231,45 @@ Run: `python manage.py seed_tools`
 
 ---
 
-## Frontend Types (key additions)
+## UI/UX Features
 
-```typescript
-// Client - new fields
-ice_number, address_line1, address_line2, city
+### Theme
+- **Light/Dark mode toggle**: Single-click button in header (sun/moon icon)
+- **Dropdown styling**: Dark mode dropdowns have dark background with light text
+- **Sidebar**: Collapsible with logo "Sufian Bouhrara"
 
-// Invoice - new fields
-deposit_amount, tva_rate, tva_amount?, total_with_tva?
+### Logo
+- **File**: `SB LOGO 4.4.svg` (root) → copied to `frontend/public/logo.svg`
+- **Display**: Sidebar shows logo with "Sufian Bouhrara" text
 
-// InvoiceItem - new field
-title: string
+### Currency Display
+- All amounts displayed with `formatCurrency()` → "X.XX MAD"
+- Invoice form unit price prefix: "MAD"
 
-// New types
-AITool, Subscription, CreditUsage, ClientServiceSelection
-ClientCostSummary, MonthlyOverview
-ToolType, PricingModel, GenerationType
-```
+---
+
+## Frontend Services
+
+| Service | File | Purpose |
+|---------|------|---------|
+| Clients | `services/clients.ts` | Client CRUD |
+| Projects | `services/projects.ts` | Project CRUD + deadlines |
+| Invoices | `services/invoices.ts` | Invoice CRUD + payments |
+| Pricing | `services/pricing.ts` | Pricing calculator |
+| Analytics | `services/analytics.ts` | Dashboard analytics |
+| Subscriptions | `services/subscriptions.ts` | AI tools, subscriptions, usage, costs |
 
 ---
 
 ## Running the App
 
+### Quick Start (Windows)
+```bash
+# Double-click start.bat
+# Opens http://localhost:3000 automatically
+```
+
+### Manual Start
 ```bash
 # Backend
 cd backend
@@ -230,6 +282,12 @@ python manage.py runserver     # http://localhost:8000
 cd frontend
 npm install
 npm run dev                    # http://localhost:3000
+```
+
+### Stop Services (Windows)
+```bash
+# Double-click stop.bat
+# Or close terminal windows
 ```
 
 **Admin:** http://localhost:8000/admin/ (admin / admin123)
@@ -258,8 +316,26 @@ GET /api/subscriptions/analytics/costs/
 ### Generate invoice PDF
 ```
 GET /api/invoices/{id}/pdf/           # View in browser
-GET /api/invoices/{id}/download_pdf/  # Download file
+GET /api/invoices/{id}/download_pdf/  # Download file (fetch + blob)
 ```
+
+---
+
+## Recent Updates
+
+### Bug Fixes
+- **Logo**: Changed from Sparkles icon to actual `SB LOGO 4.4.svg`
+- **Currency**: Changed "$" to "MAD" in invoice form
+- **Theme toggle**: Single-click toggle instead of dropdown menu
+- **Calculator**: Fixed pagination error (`pricingOptions?.find`)
+- **PDF download**: Uses fetch + blob for direct download (bypasses IDM)
+- **Dropdowns**: Dark mode styling for select elements
+
+### New Features
+- **Subscriptions frontend**: Full UI for managing AI tool subscriptions
+- **Usage tracking page**: `/subscriptions/usage` with filters
+- **Start scripts**: `start.bat` and `stop.bat` for Windows
+- **Quicksand fonts**: Copied to `backend/static/fonts/`
 
 ---
 
@@ -270,3 +346,4 @@ GET /api/invoices/{id}/download_pdf/  # Download file
 - Soft delete for clients (is_active=False)
 - WeasyPrint requires GTK3 on Windows for full template
 - Invoice items need `title` field (main line), `description` is subtitle
+- Dropdown menus styled for dark mode compatibility
