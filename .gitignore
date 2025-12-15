@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+backend/venv/
+ENV/
+env/
+.venv/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# Next.js
+.next/
+out/
+frontend/.next/
+frontend/out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+frontend/.env.local
+
+# Build
+dist/
+build/
+
+# Misc
+*.bak
+*.tmp

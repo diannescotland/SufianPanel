@@ -1,0 +1,78 @@
+from rest_framework import serializers
+from .models import Invoice, InvoiceItem, Payment
+
+
+class InvoiceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceItem
+        fields = ['id', 'service', 'description', 'quantity', 'unit_price', 'total_price']
+        read_only_fields = ['id', 'total_price']
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'invoice', 'amount', 'payment_method', 'payment_method_display',
+            'payment_date', 'notes', 'transaction_id'
+        ]
+        read_only_fields = ['id', 'payment_date']
+
+
+class InvoiceSerializer(serializers.ModelSerializer):
+    client_name = serializers.CharField(source='client.name', read_only=True)
+    project_title = serializers.CharField(source='project.title', read_only=True)
+    payment_status_display = serializers.CharField(source='get_payment_status_display', read_only=True)
+    amount_remaining = serializers.ReadOnlyField()
+    is_overdue = serializers.ReadOnlyField()
+    items = InvoiceItemSerializer(many=True, read_only=True)
+    payments = PaymentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Invoice
+        fields = [
+            'id', 'invoice_number', 'project', 'project_title', 'client', 'client_name',
+            'total_amount', 'amount_paid', 'amount_remaining', 'payment_status',
+            'payment_status_display', 'due_date', 'issued_date', 'notes', 'pdf_file',
+            'is_overdue', 'items', 'payments'
+        ]
+        read_only_fields = ['id', 'invoice_number', 'issued_date', 'amount_paid']
+
+
+class InvoiceListSerializer(serializers.ModelSerializer):
+    """Lighter serializer for list views."""
+    client_name = serializers.CharField(source='client.name', read_only=True)
+    project_title = serializers.CharField(source='project.title', read_only=True)
+    payment_status_display = serializers.CharField(source='get_payment_status_display', read_only=True)
+    amount_remaining = serializers.ReadOnlyField()
+    is_overdue = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Invoice
+        fields = [
+            'id', 'invoice_number', 'client_name', 'project_title', 'total_amount',
+            'amount_paid', 'amount_remaining', 'payment_status', 'payment_status_display',
+            'due_date', 'issued_date', 'is_overdue'
+        ]
+
+
+class InvoiceCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating invoices with items."""
+    items = InvoiceItemSerializer(many=True, required=False)
+
+    class Meta:
+        model = Invoice
+        fields = [
+            'project', 'client', 'total_amount', 'due_date', 'notes', 'items'
+        ]
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items', [])
+        invoice = Invoice.objects.create(**validated_data)
+
+        for item_data in items_data:
+            InvoiceItem.objects.create(invoice=invoice, **item_data)
+
+        return invoice
