@@ -1,183 +1,208 @@
+"""
+PDF Invoice Generator - Uses PDF template with text overlay
+
+This generator creates invoices by:
+1. Creating a text overlay with ReportLab
+2. Merging the overlay onto a PDF template using pypdf
+
+Template: static/templates/invoice_template.pdf (A4 size, exported from Canva)
+"""
+
 import os
 from io import BytesIO
 from django.conf import settings
 
-# Try to import WeasyPrint, fall back to ReportLab if not available
-WEASYPRINT_AVAILABLE = False
-try:
-    from weasyprint import HTML
-    from weasyprint.text.fonts import FontConfiguration
-    from django.template.loader import render_to_string
-    WEASYPRINT_AVAILABLE = True
-except (ImportError, OSError):
-    # WeasyPrint not available or GTK libraries missing
-    pass
-
-# ReportLab imports for fallback
+from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+from . import pdf_coordinates as coords
+
+try:
+    from pypdf import PdfReader, PdfWriter
+    PYPDF_AVAILABLE = True
+except ImportError:
+    PYPDF_AVAILABLE = False
+    print("Warning: pypdf not installed. Run: pip install pypdf")
 
 
-def generate_invoice_pdf_weasyprint(invoice):
+def register_fonts():
+    """Register custom Quicksand fonts if available."""
+    fonts_registered = {}
+    try:
+        font_dir = os.path.join(settings.BASE_DIR, 'static', 'fonts')
+
+        font_files = {
+            'Quicksand': 'Quicksand-Regular.ttf',
+            'Quicksand-Bold': 'Quicksand-Bold.ttf',
+            'Quicksand-Medium': 'Quicksand-Medium.ttf',
+            'Quicksand-Light': 'Quicksand-Light.ttf',
+        }
+
+        for font_name, font_file in font_files.items():
+            font_path = os.path.join(font_dir, font_file)
+            if os.path.exists(font_path):
+                pdfmetrics.registerFont(TTFont(font_name, font_path))
+                fonts_registered[font_name] = True
+    except Exception as e:
+        print(f"Font registration error: {e}")
+
+    return fonts_registered
+
+
+FONTS = register_fonts()
+BODY_FONT = 'Quicksand' if 'Quicksand' in FONTS else 'Helvetica'
+BOLD_FONT = 'Quicksand-Bold' if 'Quicksand-Bold' in FONTS else 'Helvetica-Bold'
+
+
+def create_text_overlay(invoice):
     """
-    Generate a PDF invoice using WeasyPrint with the Canva template.
-    Uses Quicksand font and the SB logo.
-    """
-    font_config = FontConfiguration()
-
-    # Paths
-    static_dir = os.path.join(settings.BASE_DIR, 'static')
-    font_path = os.path.join(static_dir, 'fonts')
-    logo_path = os.path.join(static_dir, 'images', 'logo.svg')
-
-    # Calculate remaining amount after deposit
-    remaining_amount = 0
-    if invoice.deposit_amount:
-        remaining_amount = invoice.total_amount - invoice.deposit_amount
-
-    # Get items with proper titles
-    items = []
-    for item in invoice.items.all():
-        items.append({
-            'title': getattr(item, 'title', None) or item.description,
-            'subtitle': item.description if getattr(item, 'title', None) else None,
-            'quantity': item.quantity,
-            'total_price': item.total_price,
-        })
-
-    context = {
-        'invoice': invoice,
-        'client': invoice.client,
-        'items': items,
-        'font_path': font_path,
-        'logo_path': logo_path,
-        'remaining_amount': remaining_amount,
-    }
-
-    html_string = render_to_string('invoices/invoice_template.html', context)
-
-    html = HTML(string=html_string, base_url=str(settings.BASE_DIR))
-    pdf = html.write_pdf(font_config=font_config)
-
-    return pdf
-
-
-def generate_invoice_pdf_reportlab(invoice):
-    """
-    Generate a PDF invoice using ReportLab (fallback).
+    Create a transparent PDF with just the invoice text.
+    Returns PDF bytes that can be merged onto the template.
     """
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    # Use same page size as template (596 x 842 points)
+    c = canvas.Canvas(buffer, pagesize=(coords.PAGE_WIDTH, coords.PAGE_HEIGHT))
 
-    # Styles
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, spaceAfter=20)
-    heading_style = ParagraphStyle('Heading', parent=styles['Heading2'], fontSize=14, spaceAfter=10)
-    normal_style = styles['Normal']
+    # Set text color
+    text_color = colors.HexColor(coords.TEXT_COLOR)
+    c.setFillColor(text_color)
 
-    elements = []
+    client = invoice.client
 
-    # Header
-    elements.append(Paragraph("FACTURE", title_style))
-    elements.append(Spacer(1, 10))
+    # ==========================================================================
+    # CLIENT INFO
+    # ==========================================================================
+    c.setFont(BODY_FONT, coords.FONT_SIZE_NORMAL)
 
-    # Invoice details
-    invoice_info = [
-        ['Facture n°:', invoice.invoice_number],
-        ['Date:', invoice.issued_date.strftime('%d-%m-%Y')],
-        ['Échéance:', invoice.due_date.strftime('%d-%m-%Y')],
-        ['Statut:', invoice.get_payment_status_display()],
-    ]
-    info_table = Table(invoice_info, colWidths=[1.5*inch, 3*inch])
-    info_table.setStyle(TableStyle([
-        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-    ]))
-    elements.append(info_table)
-    elements.append(Spacer(1, 20))
+    # Client name (company or personal name)
+    client_name = client.company or client.name
+    c.drawString(coords.CLIENT_NAME_X, coords.CLIENT_NAME_Y, client_name)
 
-    # Client info
-    elements.append(Paragraph("Facturé à:", heading_style))
-    elements.append(Paragraph(invoice.client.company or invoice.client.name, normal_style))
-    if invoice.client.address_line1:
-        elements.append(Paragraph(invoice.client.address_line1, normal_style))
-    if invoice.client.ice_number:
-        elements.append(Paragraph(f"ICE: {invoice.client.ice_number}", normal_style))
-    elements.append(Spacer(1, 20))
+    # Client address
+    address_parts = []
+    if hasattr(client, 'address_line1') and client.address_line1:
+        address_parts.append(client.address_line1)
+    if hasattr(client, 'address_line2') and client.address_line2:
+        address_parts.append(client.address_line2)
+    if hasattr(client, 'city') and client.city:
+        address_parts.append(client.city)
 
-    # Line items
-    elements.append(Paragraph("Détails:", heading_style))
-    items_data = [['Description', 'Qté', 'Prix U.', 'Total']]
-    for item in invoice.items.all():
+    if address_parts:
+        full_address = ", ".join(address_parts)
+        c.drawString(coords.CLIENT_ADDRESS_X, coords.CLIENT_ADDRESS_Y, full_address)
+
+    # ==========================================================================
+    # INVOICE METADATA
+    # ==========================================================================
+    c.setFont(BODY_FONT, coords.FONT_SIZE_NORMAL)
+
+    # Invoice number
+    c.drawString(coords.INVOICE_NUMBER_X, coords.INVOICE_NUMBER_Y, invoice.invoice_number)
+
+    # Date
+    c.drawString(coords.DATE_X, coords.DATE_Y, invoice.issued_date.strftime("%d-%m-%Y"))
+
+    # ==========================================================================
+    # LINE ITEMS
+    # ==========================================================================
+    items = list(invoice.items.all())[:4]  # Max 4 items
+
+    for idx, item in enumerate(items):
+        if idx >= len(coords.ITEM_ROWS_Y):
+            break
+
+        row_y = coords.ITEM_ROWS_Y[idx]
+
+        # Item title (left-aligned)
+        c.setFont(BODY_FONT, coords.FONT_SIZE_ITEM)
         title = getattr(item, 'title', None) or item.description
-        items_data.append([
-            title,
-            str(item.quantity),
-            f"{item.unit_price:.0f} MAD",
-            f"{item.total_price:.0f} MAD",
-        ])
+        c.drawString(coords.ITEM_DESC_X, row_y, title[:50])
 
-    items_table = Table(items_data, colWidths=[3.5*inch, 0.75*inch, 1*inch, 1*inch])
-    items_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#2A7B88')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-    ]))
-    elements.append(items_table)
-    elements.append(Spacer(1, 20))
+        # Quantity (center-aligned)
+        qty_text = str(item.quantity)
+        qty_width = c.stringWidth(qty_text, BODY_FONT, coords.FONT_SIZE_ITEM)
+        c.drawString(coords.ITEM_QTY_X - qty_width / 2, row_y, qty_text)
 
-    # Totals
-    tva_rate = getattr(invoice, 'tva_rate', 0) or 0
-    totals_data = [
-        ['', '', 'Total HT:', f"{invoice.total_amount:.0f} MAD"],
-        ['', '', f'TVA ({tva_rate:.0f}%):', f"{float(invoice.total_amount) * float(tva_rate) / 100:.0f} MAD"],
-        ['', '', 'Payé:', f"{invoice.amount_paid:.0f} MAD"],
-        ['', '', 'Reste à payer:', f"{float(invoice.total_amount) - float(invoice.amount_paid):.0f} MAD"],
-    ]
-    totals_table = Table(totals_data, colWidths=[3.5*inch, 0.75*inch, 1*inch, 1*inch])
-    totals_table.setStyle(TableStyle([
-        ('FONTNAME', (2, -1), (-1, -1), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('ALIGN', (2, 0), (-1, -1), 'RIGHT'),
-        ('LINEABOVE', (2, -1), (-1, -1), 1, colors.black),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-    ]))
-    elements.append(totals_table)
+        # Total (right-aligned, bold)
+        c.setFont(BOLD_FONT, coords.FONT_SIZE_ITEM)
+        total_text = f"{item.total_price:.0f}"
+        total_width = c.stringWidth(total_text, BOLD_FONT, coords.FONT_SIZE_ITEM)
+        c.drawString(coords.ITEM_TOTAL_X - total_width, row_y, total_text)
 
-    # Notes
-    if invoice.notes:
-        elements.append(Spacer(1, 30))
-        elements.append(Paragraph("Notes:", heading_style))
-        elements.append(Paragraph(invoice.notes, normal_style))
+        # TVA per row (right-aligned)
+        c.setFont(BODY_FONT, coords.FONT_SIZE_ITEM)
+        tva_row_text = f"{int(invoice.tva_rate)}%"
+        tva_row_width = c.stringWidth(tva_row_text, BODY_FONT, coords.FONT_SIZE_ITEM)
+        c.drawString(coords.TVA_COLUMN_X - tva_row_width, row_y, tva_row_text)
 
-    # Footer
-    elements.append(Spacer(1, 40))
-    elements.append(Paragraph("Soufian BOUHRARA - Auto-Entrepreneur", normal_style))
-    elements.append(Paragraph("ICE: 003747242000025", normal_style))
-    elements.append(Paragraph("Banque: Al Barid Bank", normal_style))
-    elements.append(Paragraph("RIB: 350810000000001304811290", normal_style))
+    # ==========================================================================
+    # TOTAL AMOUNT
+    # ==========================================================================
+    c.setFont(BOLD_FONT, coords.FONT_SIZE_TOTAL)
 
-    # Build PDF
-    doc.build(elements)
+    # Format: "7 500 dhs" with space thousands separator
+    total_formatted = f"{int(invoice.total_amount):,} dhs".replace(',', ' ')
+    total_width = c.stringWidth(total_formatted, BOLD_FONT, coords.FONT_SIZE_TOTAL)
 
+    c.drawString(coords.TOTAL_AMOUNT_X - total_width, coords.TOTAL_AMOUNT_Y, total_formatted)
+
+    # Finalize
+    c.save()
     buffer.seek(0)
     return buffer.getvalue()
 
 
 def generate_invoice_pdf(invoice):
     """
-    Generate a PDF invoice. Uses WeasyPrint if available, otherwise ReportLab.
+    Generate a PDF invoice by merging text onto the PDF template.
+
+    Args:
+        invoice: Invoice model instance
+
+    Returns:
+        bytes: PDF file content
     """
-    if WEASYPRINT_AVAILABLE:
-        return generate_invoice_pdf_weasyprint(invoice)
-    else:
-        return generate_invoice_pdf_reportlab(invoice)
+    # Create the text overlay
+    overlay_bytes = create_text_overlay(invoice)
+
+    # Path to PDF template
+    template_path = os.path.join(settings.BASE_DIR, 'static', 'templates', 'invoice_template.pdf')
+
+    # If pypdf is available and template exists, merge them
+    if PYPDF_AVAILABLE and os.path.exists(template_path):
+        try:
+            # Load template
+            template_pdf = PdfReader(template_path)
+            template_page = template_pdf.pages[0]
+
+            # Load overlay
+            overlay_pdf = PdfReader(BytesIO(overlay_bytes))
+            overlay_page = overlay_pdf.pages[0]
+
+            # Merge overlay onto template
+            template_page.merge_page(overlay_page)
+
+            # Write to buffer
+            writer = PdfWriter()
+            writer.add_page(template_page)
+
+            result_buffer = BytesIO()
+            writer.write(result_buffer)
+            result_buffer.seek(0)
+
+            return result_buffer.getvalue()
+
+        except Exception as e:
+            print(f"PDF merge error: {e}")
+            # Fall back to overlay-only
+
+    # Fallback: return just the text overlay (no template background)
+    # This can happen if template is missing or pypdf is not installed
+    if not os.path.exists(template_path):
+        print(f"Warning: PDF template not found at {template_path}")
+        print("Please export your Canva template as PDF and save it there.")
+
+    return overlay_bytes
