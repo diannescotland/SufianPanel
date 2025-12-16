@@ -41,11 +41,12 @@ class CostCalculatorView(APIView):
 
             # Get tier price
             tier_prices = {
-                'basic': pricing.basic_price,
+                'free': pricing.free_price,
                 'standard': pricing.standard_price,
-                'premium': pricing.premium_price,
+                'pro': pricing.pro_price,
+                'premier': pricing.premier_price or Decimal('0.00'),
             }
-            tier_price = tier_prices.get(item['tier'], pricing.basic_price)
+            tier_price = tier_prices.get(item['tier'], pricing.free_price)
 
             # Calculate unit costs
             quantity_cost = Decimal('0.00')

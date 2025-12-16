@@ -23,9 +23,10 @@ import { ServicePricing } from '@/types'
 
 // Tier colors
 const tierColors = {
-  basic: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
+  free: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
   standard: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
-  premium: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
+  pro: 'bg-purple-500/10 text-purple-500 border-purple-500/30',
+  premier: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
 }
 
 // Service type icons
@@ -39,7 +40,7 @@ const serviceTypeIcons: Record<string, typeof Image> = {
 interface CalculatorLineItem {
   id: string
   ai_tool: string
-  tier: 'basic' | 'standard' | 'premium'
+  tier: 'free' | 'standard' | 'pro' | 'premier'
   quantity: number
   duration_seconds: number
 }
@@ -50,7 +51,7 @@ function generateId() {
 
 export default function CalculatorPage() {
   const [items, setItems] = useState<CalculatorLineItem[]>([
-    { id: generateId(), ai_tool: '', tier: 'basic', quantity: 1, duration_seconds: 0 },
+    { id: generateId(), ai_tool: '', tier: 'free', quantity: 1, duration_seconds: 0 },
   ])
   const [result, setResult] = useState<{ breakdown: CostBreakdownItem[]; total_cost: number } | null>(null)
 
@@ -70,7 +71,7 @@ export default function CalculatorPage() {
   const addItem = () => {
     setItems([
       ...items,
-      { id: generateId(), ai_tool: '', tier: 'basic', quantity: 1, duration_seconds: 0 },
+      { id: generateId(), ai_tool: '', tier: 'free', quantity: 1, duration_seconds: 0 },
     ])
   }
 
@@ -199,12 +200,12 @@ export default function CalculatorPage() {
                       </div>
 
                       {/* Tier selection */}
-                      <div>
+                      <div className="lg:col-span-2">
                         <label className="block text-xs font-medium text-muted-foreground mb-1.5">
                           Tier
                         </label>
                         <div className="flex gap-1">
-                          {(['basic', 'standard', 'premium'] as const).map((tier) => (
+                          {(['free', 'standard', 'pro', 'premier'] as const).map((tier) => (
                             <button
                               key={tier}
                               type="button"
@@ -382,13 +383,16 @@ export default function CalculatorPage() {
                       Type
                     </th>
                     <th className="px-3 py-2 text-center text-xs font-medium text-muted-foreground uppercase">
-                      Basic
+                      Free
                     </th>
                     <th className="px-3 py-2 text-center text-xs font-medium text-muted-foreground uppercase">
                       Standard
                     </th>
                     <th className="px-3 py-2 text-center text-xs font-medium text-muted-foreground uppercase">
-                      Premium
+                      Pro
+                    </th>
+                    <th className="px-3 py-2 text-center text-xs font-medium text-muted-foreground uppercase">
+                      Premier
                     </th>
                     <th className="px-3 py-2 text-center text-xs font-medium text-muted-foreground uppercase">
                       Per Unit
@@ -410,13 +414,16 @@ export default function CalculatorPage() {
                           </div>
                         </td>
                         <td className="px-3 py-3 text-center text-muted-foreground">
-                          {formatCurrency(pricing.basic_price)}
+                          {formatCurrency(pricing.free_price)}
                         </td>
                         <td className="px-3 py-3 text-center text-muted-foreground">
                           {formatCurrency(pricing.standard_price)}
                         </td>
                         <td className="px-3 py-3 text-center text-muted-foreground">
-                          {formatCurrency(pricing.premium_price)}
+                          {formatCurrency(pricing.pro_price)}
+                        </td>
+                        <td className="px-3 py-3 text-center text-muted-foreground">
+                          {pricing.premier_price ? formatCurrency(pricing.premier_price) : '-'}
                         </td>
                         <td className="px-3 py-3 text-center text-muted-foreground">
                           {pricing.service_type === 'image'

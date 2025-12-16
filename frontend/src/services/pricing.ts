@@ -3,7 +3,7 @@ import { ServicePricing } from '@/types'
 
 export interface CostCalculatorItem {
   ai_tool: string
-  tier: 'basic' | 'standard' | 'premium'
+  tier: 'free' | 'standard' | 'pro' | 'premier'
   quantity: number
   duration_seconds?: number
 }

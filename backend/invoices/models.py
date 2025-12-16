@@ -95,23 +95,28 @@ class Invoice(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        # Generate invoice number if not set (format: SB6-XX)
+        # Generate invoice number if not set (format: SB{month}-{N}, starting at 9)
         if not self.invoice_number:
+            from datetime import datetime
+            current_month = datetime.now().month
+            prefix = f'SB{current_month}-'
+
             with transaction.atomic():
-                last_invoice = Invoice.objects.select_for_update().filter(
-                    invoice_number__startswith='SB6-'
-                ).order_by('-invoice_number').first()
+                # Get all invoices for current month and find the highest number
+                invoices = Invoice.objects.select_for_update().filter(
+                    invoice_number__startswith=prefix
+                )
 
-                if last_invoice:
+                max_num = 8  # Start at 9 (8 + 1)
+                for inv in invoices:
                     try:
-                        last_num = int(last_invoice.invoice_number.split('-')[1])
-                        new_num = last_num + 1
+                        num = int(inv.invoice_number.split('-')[1])
+                        if num > max_num:
+                            max_num = num
                     except (ValueError, IndexError):
-                        new_num = 1
-                else:
-                    new_num = 1
+                        pass
 
-                self.invoice_number = f'SB6-{new_num}'
+                self.invoice_number = f'{prefix}{max_num + 1}'
 
         super().save(*args, **kwargs)
 

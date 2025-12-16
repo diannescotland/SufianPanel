@@ -22,7 +22,8 @@ class ServicePricingSerializer(serializers.ModelSerializer):
         model = ServicePricing
         fields = [
             'id', 'ai_tool', 'display_name', 'service_type', 'service_type_display',
-            'basic_price', 'standard_price', 'premium_price',
+            'free_price', 'standard_price', 'pro_price', 'premier_price',
+            'free_credits', 'standard_credits', 'pro_credits', 'premier_credits',
             'price_per_image', 'price_per_video_second',
             'description', 'features', 'is_active', 'updated_at'
         ]
@@ -31,6 +32,6 @@ class ServicePricingSerializer(serializers.ModelSerializer):
 class CostCalculatorSerializer(serializers.Serializer):
     """Serializer for cost calculation requests."""
     ai_tool = serializers.CharField()
-    tier = serializers.ChoiceField(choices=['basic', 'standard', 'premium'])
+    tier = serializers.ChoiceField(choices=['free', 'standard', 'pro', 'premier'])
     quantity = serializers.IntegerField(min_value=1, default=1)
     duration_seconds = serializers.IntegerField(min_value=0, default=0, required=False)

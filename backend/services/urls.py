@@ -7,6 +7,7 @@ router.register('services', ServiceViewSet)
 router.register('pricing', ServicePricingViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    # Put explicit paths before router to prevent router from intercepting
     path('pricing/calculate/', CostCalculatorView.as_view(), name='calculate-cost'),
+    path('', include(router.urls)),
 ]

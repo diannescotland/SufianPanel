@@ -52,6 +52,67 @@ class AITool(models.Model):
         help_text="Coût par seconde de vidéo en MAD"
     )
 
+    # =========================================================================
+    # PRICING TIERS (Free / Standard / Pro / Premier)
+    # Exchange rate: 1 USD = 9.16 MAD
+    # =========================================================================
+
+    # Free Tier
+    free_monthly_cost_mad = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text="Coût mensuel Free (généralement 0)"
+    )
+    free_credits_per_month = models.IntegerField(
+        default=0,
+        help_text="Crédits gratuits par mois"
+    )
+    free_features = models.TextField(
+        blank=True,
+        help_text="Caractéristiques du plan Free (séparées par virgule)"
+    )
+
+    # Standard Tier
+    standard_monthly_cost_mad = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Coût mensuel Standard en MAD"
+    )
+    standard_credits_per_month = models.IntegerField(
+        null=True, blank=True,
+        help_text="Crédits inclus dans le plan Standard"
+    )
+    standard_features = models.TextField(
+        blank=True,
+        help_text="Caractéristiques du plan Standard"
+    )
+
+    # Pro Tier
+    pro_monthly_cost_mad = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Coût mensuel Pro en MAD"
+    )
+    pro_credits_per_month = models.IntegerField(
+        null=True, blank=True,
+        help_text="Crédits inclus dans le plan Pro"
+    )
+    pro_features = models.TextField(
+        blank=True,
+        help_text="Caractéristiques du plan Pro"
+    )
+
+    # Premier Tier
+    premier_monthly_cost_mad = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Coût mensuel Premier en MAD"
+    )
+    premier_credits_per_month = models.IntegerField(
+        null=True, blank=True,
+        help_text="Crédits inclus dans le plan Premier"
+    )
+    premier_features = models.TextField(
+        blank=True,
+        help_text="Caractéristiques du plan Premier"
+    )
+
     icon = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True)
 

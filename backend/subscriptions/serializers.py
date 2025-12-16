@@ -21,17 +21,29 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Subscription
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove UniqueTogetherValidator for consistency
+        self.validators = []
+
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
-    """Simplified serializer for creating subscriptions."""
+    """Simplified serializer for creating/updating subscriptions."""
+    tool_name = serializers.CharField(source='tool.display_name', read_only=True)
 
     class Meta:
         model = Subscription
         fields = [
-            'tool', 'billing_month', 'total_cost_mad',
+            'id', 'tool', 'tool_name', 'billing_month', 'total_cost_mad',
             'original_amount', 'original_currency', 'exchange_rate',
             'total_credits', 'notes'
         ]
+        read_only_fields = ['id', 'tool_name']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove UniqueTogetherValidator - view handles upsert logic
+        self.validators = []
 
 
 class CreditUsageSerializer(serializers.ModelSerializer):
@@ -73,6 +85,26 @@ class ClientServiceSelectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientServiceSelection
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove UniqueTogetherValidator - view handles upsert logic
+        self.validators = []
+
+
+class ClientServiceSelectionCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating/updating client service selections."""
+    tool_name = serializers.CharField(source='tool.display_name', read_only=True)
+
+    class Meta:
+        model = ClientServiceSelection
+        fields = ['id', 'client', 'tool', 'tool_name', 'is_active', 'notes']
+        read_only_fields = ['id', 'tool_name']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Remove UniqueTogetherValidator - view handles upsert logic
+        self.validators = []
 
 
 class ClientCostSummarySerializer(serializers.Serializer):

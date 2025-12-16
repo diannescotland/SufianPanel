@@ -44,7 +44,7 @@ DATE_Y = 1254.0  # aligned with "Date du:" label
 # =============================================================================
 # Column X positions
 ITEM_DESC_X = 102.0        # Description (left-aligned)
-ITEM_QTY_X = 480.0         # Quantity (center-aligned)
+ITEM_QTY_X = 490.0         # Quantity (center-aligned)
 ITEM_TOTAL_X = 1000.0       # Total (right-aligned)
 
 # Row Y positions (4 rows maximum)
@@ -63,7 +63,7 @@ ITEM_ROWS_Y = [
 # TVA COLUMN IN LINE ITEMS TABLE
 # =============================================================================
 # TVA value per row (same Y as each item row)
-TVA_COLUMN_X = 715.0       # Right edge for TVA values in table
+TVA_COLUMN_X = 725.0       # Right edge for TVA values in table
 
 # =============================================================================
 # TOTAL SECTION (inside tan/beige box)

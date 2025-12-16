@@ -11,6 +11,6 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(ServicePricing)
 class ServicePricingAdmin(admin.ModelAdmin):
-    list_display = ['display_name', 'ai_tool', 'service_type', 'basic_price', 'standard_price', 'premium_price', 'is_active']
+    list_display = ['display_name', 'ai_tool', 'service_type', 'free_price', 'standard_price', 'pro_price', 'premier_price', 'is_active']
     list_filter = ['service_type', 'is_active']
     search_fields = ['display_name', 'ai_tool']

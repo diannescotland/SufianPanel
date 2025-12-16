@@ -115,9 +115,17 @@ export interface ServicePricing {
   display_name: string
   service_type: ServiceType
   service_type_display?: string
-  basic_price: number
+  // Pricing tiers
+  free_price: number
   standard_price: number
-  premium_price: number
+  pro_price: number
+  premier_price: number | null
+  // Credits per tier
+  free_credits: number
+  standard_credits: number
+  pro_credits: number
+  premier_credits: number | null
+  // Per unit pricing
   price_per_image: number
   price_per_video_second: number
   description: string
@@ -224,6 +232,19 @@ export interface AITool {
   default_credits_per_month: number
   default_cost_per_image_mad: number
   default_cost_per_video_second_mad: number
+  // Pricing tiers (Free / Standard / Pro / Premier)
+  free_monthly_cost_mad: number
+  free_credits_per_month: number
+  free_features: string
+  standard_monthly_cost_mad: number | null
+  standard_credits_per_month: number | null
+  standard_features: string
+  pro_monthly_cost_mad: number | null
+  pro_credits_per_month: number | null
+  pro_features: string
+  premier_monthly_cost_mad: number | null
+  premier_credits_per_month: number | null
+  premier_features: string
   icon: string
   is_active: boolean
 }

@@ -55,10 +55,17 @@ class ServicePricing(models.Model):
     display_name = models.CharField(max_length=100)
     service_type = models.CharField(max_length=20, choices=SERVICE_TYPES)
 
-    # Pricing tiers
-    basic_price = models.DecimalField(max_digits=10, decimal_places=2)
-    standard_price = models.DecimalField(max_digits=10, decimal_places=2)
-    premium_price = models.DecimalField(max_digits=10, decimal_places=2)
+    # Pricing tiers (Free / Standard / Pro / Premier)
+    free_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    standard_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    pro_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    premier_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    # Credits per tier
+    free_credits = models.IntegerField(default=0)
+    standard_credits = models.IntegerField(default=0)
+    pro_credits = models.IntegerField(default=0)
+    premier_credits = models.IntegerField(null=True, blank=True)
 
     # Per unit pricing
     price_per_image = models.DecimalField(max_digits=10, decimal_places=2, default=0)

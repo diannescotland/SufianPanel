@@ -14,7 +14,7 @@
 |-------|------|
 | Backend | Django 6.0 + DRF, SQLite, JWT auth |
 | Frontend | Next.js 16 + React 19, Tailwind CSS 4, React Query v5 |
-| PDF | ReportLab (fallback) / WeasyPrint (if GTK installed) |
+| PDF | ReportLab (pure Python, Canva template match) |
 
 ---
 
@@ -24,11 +24,14 @@
 backend/
 ├── config/           # Settings, URLs
 ├── clients/          # Client management
+│   └── management/commands/seed_data.py
 ├── projects/         # Project workflow
 ├── invoices/         # Invoices, payments, PDF generation
+│   └── management/commands/migrate_invoice_numbers.py
 ├── services/         # Service pricing
 ├── analytics/        # Dashboard analytics
 ├── subscriptions/    # AI tool credit tracking
+│   └── management/commands/seed_tools.py
 └── static/
     ├── images/logo.svg
     └── fonts/        # Quicksand fonts (Quicksand-Regular.ttf, etc.)
@@ -207,10 +210,14 @@ client (FK), tool (FK), is_active, notes
 
 ### Invoice PDF Generation
 - **Location:** `backend/invoices/pdf_generator.py`
-- **Template:** `backend/invoices/templates/invoices/invoice_template.html`
-- Uses WeasyPrint if GTK installed, falls back to ReportLab
-- French format: "FACTURE", amounts in MAD/dhs
-- Includes seller info: Soufian BOUHRARA, ICE, bank details
+- Pure ReportLab implementation (no GTK/WeasyPrint dependency)
+- Exact carbon copy of Canva template (222.pdf) with:
+  - Beige header/footer bands (#D4C4B0)
+  - Teal logo box (#2A7B88) with "Sufian BOUHRARA" text
+  - Quicksand fonts (falls back to Helvetica if not found)
+  - French format: "FACTURE", amounts in MAD/dhs
+  - Seller info + stamp box with ICE: 003747242000025
+  - Bank details: Al Barid Bank, RIB, IBAN
 
 ### Invoice Number Format
 - Pattern: `SB6-{N}` (sequential)
@@ -228,6 +235,14 @@ client (FK), tool (FK), is_active, notes
 kling_ai, freepik, openart, adobe, suno_ai, grok, higgsfield, runway, openai
 ```
 Run: `python manage.py seed_tools`
+
+### Management Commands
+```bash
+python manage.py seed_tools              # Seed AI tools with default pricing
+python manage.py seed_data               # Seed sample clients
+python manage.py migrate_invoice_numbers # Migrate old INV-YYYY-XXXXX to SB6-XX format
+python manage.py migrate_invoice_numbers --dry-run  # Preview changes only
+```
 
 ---
 
@@ -330,12 +345,16 @@ GET /api/invoices/{id}/download_pdf/  # Download file (fetch + blob)
 - **Calculator**: Fixed pagination error (`pricingOptions?.find`)
 - **PDF download**: Uses fetch + blob for direct download (bypasses IDM)
 - **Dropdowns**: Dark mode styling for select elements
+- **Invoice creation**: Fixed missing `id` in API response (was causing "Invoice not found" after create)
+- **PDF generator**: Fixed `RoundRect` import error in ReportLab
 
 ### New Features
 - **Subscriptions frontend**: Full UI for managing AI tool subscriptions
 - **Usage tracking page**: `/subscriptions/usage` with filters
 - **Start scripts**: `start.bat` and `stop.bat` for Windows
 - **Quicksand fonts**: Copied to `backend/static/fonts/`
+- **PDF generator rewrite**: Pure ReportLab implementation matching Canva template exactly
+- **Invoice migration command**: `migrate_invoice_numbers` to convert old format to SB6-XX
 
 ---
 
@@ -344,6 +363,6 @@ GET /api/invoices/{id}/download_pdf/  # Download file (fetch + blob)
 - All amounts in MAD (Moroccan Dirham)
 - TVA default 0% (auto-entrepreneur status)
 - Soft delete for clients (is_active=False)
-- WeasyPrint requires GTK3 on Windows for full template
+- PDF generation uses pure ReportLab (no GTK/WeasyPrint dependency)
 - Invoice items need `title` field (main line), `description` is subtitle
 - Dropdown menus styled for dark mode compatibility
