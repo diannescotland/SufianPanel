@@ -17,8 +17,9 @@ if %ERRORLEVEL% NEQ 0 (
     color 0C
     echo [ERREUR] Docker n'est pas demarre!
     echo.
-    echo Veuillez ouvrir Docker Desktop et attendre
-    echo qu'il soit pret (icone verte).
+    echo 1. Ouvrez Docker Desktop depuis le menu Demarrer
+    echo 2. Attendez que l'icone devienne verte (en bas a gauche)
+    echo 3. Relancez ce fichier
     echo.
     pause
     exit /b 1
@@ -26,38 +27,50 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo [OK] Docker est pret
 echo.
-echo Demarrage de l'application...
-echo (Cela peut prendre 1-2 minutes la premiere fois)
-echo.
 
-:: Start containers (try both docker-compose and docker compose)
-docker compose up -d 2>nul
+:: Check if images exist (first run detection)
+docker images sufianpanel-backend --format "{{.Repository}}" 2>nul | findstr "sufianpanel-backend" >nul
 if %ERRORLEVEL% NEQ 0 (
-    docker-compose up -d
-)
-
-if %ERRORLEVEL% NEQ 0 (
-    color 0C
+    echo ========================================
+    echo    PREMIERE INSTALLATION EN COURS...
+    echo ========================================
     echo.
-    echo [ERREUR] Impossible de demarrer l'application.
-    echo Verifiez que Docker Desktop fonctionne correctement.
+    echo Telechargement et configuration des composants.
+    echo Cela peut prendre 3-5 minutes. Veuillez patienter...
     echo.
-    pause
-    exit /b 1
+
+    :: First run - show progress (not detached)
+    docker compose up --build
+) else (
+    echo Demarrage de l'application...
+    echo.
+
+    :: Normal run - detached mode
+    docker compose up -d
+
+    if %ERRORLEVEL% NEQ 0 (
+        color 0C
+        echo.
+        echo [ERREUR] Impossible de demarrer l'application.
+        echo Verifiez que Docker Desktop fonctionne correctement.
+        echo.
+        pause
+        exit /b 1
+    )
+
+    echo.
+    echo ========================================
+    echo    APPLICATION DEMARREE!
+    echo ========================================
+    echo.
+    echo Ouvrez votre navigateur:
+    echo http://localhost:3000
+    echo.
+    echo Pour arreter: lancez stop.bat
+    echo.
+
+    :: Open browser
+    start http://localhost:3000
 )
-
-echo.
-echo ========================================
-echo    APPLICATION DEMARREE!
-echo ========================================
-echo.
-echo Ouvrez votre navigateur:
-echo http://localhost:3000
-echo.
-echo Pour arreter: lancez stop.bat
-echo.
-
-:: Open browser
-start http://localhost:3000
 
 pause
