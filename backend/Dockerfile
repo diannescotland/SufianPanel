@@ -45,6 +45,9 @@ python manage.py seed_admin 2>/dev/null || true\n\
 # Seed tools\n\
 python manage.py seed_tools 2>/dev/null || true\n\
 \n\
+# Fix existing clients to be active\n\
+python manage.py fix_active_clients 2>/dev/null || true\n\
+\n\
 # Start server\n\
 exec python manage.py runserver 0.0.0.0:8000' > /entrypoint.sh \
     && chmod +x /entrypoint.sh

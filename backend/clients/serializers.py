@@ -9,6 +9,7 @@ class ClientSerializer(serializers.ModelSerializer):
     total_invoiced = serializers.SerializerMethodField()
     total_paid = serializers.SerializerMethodField()
     outstanding_balance = serializers.SerializerMethodField()
+    is_active = serializers.BooleanField(default=True)
 
     class Meta:
         model = Client

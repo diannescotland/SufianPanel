@@ -61,7 +61,7 @@ export default function NewClientPage() {
   })
 
   const createMutation = useMutation({
-    mutationFn: (data: ClientFormData) => clientsService.create(data),
+    mutationFn: (data: ClientFormData) => clientsService.create({ ...data, is_active: true }),
     onSuccess: (newClient) => {
       queryClient.invalidateQueries({ queryKey: ['clients'] })
       setErrorDetails(null)
