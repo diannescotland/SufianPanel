@@ -86,8 +86,8 @@ export default function ProjectsPage() {
               onChange={(e) => setSearch(e.target.value)}
               className={cn(
                 'w-full pl-11 pr-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground placeholder:text-muted-foreground/60',
+                'bg-muted border border-border/50',
+                'text-foreground placeholder:text-muted-foreground',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                 'transition-all'
               )}
@@ -104,7 +104,7 @@ export default function ProjectsPage() {
                   'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                   statusFilter === filter.value
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary'
+                    : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80'
                 )}
               >
                 {filter.label}
@@ -113,7 +113,7 @@ export default function ProjectsPage() {
           </div>
 
           {/* View toggle */}
-          <div className="flex items-center gap-1 p-1 bg-secondary/50 rounded-lg">
+          <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
             <button
               onClick={() => setViewMode('grid')}
               className={cn(

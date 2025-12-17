@@ -1,5 +1,6 @@
 'use client'
 
+// Dashboard page
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { useQuery } from '@tanstack/react-query'
 import { analyticsService } from '@/services/analytics'
@@ -43,8 +44,8 @@ export default function DashboardPage() {
       label: 'Active Clients',
       value: overview?.active_clients || 0,
       icon: Users,
-      color: 'bg-secondary',
-      bgGlow: 'bg-secondary/20',
+      color: 'bg-primary',
+      bgGlow: 'bg-primary/20',
     },
     {
       label: 'Pending Invoices',
