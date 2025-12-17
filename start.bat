@@ -72,6 +72,9 @@ echo.
 echo Demarrage des services...
 echo.
 
+:: Open browser after a short delay
+start "" http://localhost:3000
+
 docker compose up
 
 echo.
