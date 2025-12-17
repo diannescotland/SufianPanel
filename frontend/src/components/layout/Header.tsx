@@ -2,6 +2,7 @@
 
 import { useState, memo } from 'react'
 import { useTheme } from '@/providers/theme-provider'
+import { useSettings, getSettingsInitials } from '@/providers/settings-provider'
 import { authService } from '@/services/auth'
 import { cn } from '@/lib/utils'
 import {
@@ -10,7 +11,6 @@ import {
   Sun,
   Moon,
   Menu,
-  User,
   LogOut,
   Settings,
   ChevronDown,
@@ -23,6 +23,7 @@ interface HeaderProps {
 
 export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
   const { setTheme, resolvedTheme } = useTheme()
+  const { settings } = useSettings()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
 
   return (
@@ -41,7 +42,7 @@ export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: He
           {/* Mobile menu button */}
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
             aria-label="Open navigation menu"
           >
             <Menu className="w-5 h-5 text-muted-foreground" />
@@ -55,17 +56,17 @@ export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: He
             }}
             className={cn(
               'relative flex items-center w-72 rounded-xl',
-              'bg-secondary/60 hover:bg-secondary transition-colors'
+              'bg-muted hover:bg-muted/80 transition-colors'
             )}
             aria-label="Search (Cmd+K)"
           >
             <Search className="absolute left-4 w-4 h-4 text-muted-foreground" />
-            <span className="w-full py-2.5 pl-11 pr-4 text-sm text-muted-foreground/60 text-left">
+            <span className="w-full py-2.5 pl-11 pr-4 text-sm text-muted-foreground text-left">
               Search...
             </span>
             <kbd className={cn(
               'absolute right-3 px-2 py-0.5 rounded text-[10px] font-medium tracking-wide',
-              'bg-background/80 text-muted-foreground/60 border border-border/50'
+              'bg-background/80 text-muted-foreground border border-border/50'
             )}>
               ⌘K
             </kbd>
@@ -76,7 +77,7 @@ export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: He
         <div className="flex items-center gap-2">
           {/* Notifications */}
           <button
-            className="relative p-2.5 rounded-xl hover:bg-secondary transition-colors group"
+            className="relative p-2.5 rounded-xl hover:bg-muted transition-colors group"
             aria-label="View notifications"
           >
             <Bell className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -86,7 +87,7 @@ export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: He
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-            className="p-2.5 rounded-xl hover:bg-secondary transition-colors group"
+            className="p-2.5 rounded-xl hover:bg-muted transition-colors group"
             aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {resolvedTheme === 'dark' ? (
@@ -105,18 +106,20 @@ export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: He
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className={cn(
                 'flex items-center gap-3 p-1.5 pr-3 rounded-xl',
-                'hover:bg-secondary transition-colors group'
+                'hover:bg-muted transition-colors group'
               )}
               aria-label="Open profile menu"
               aria-expanded={showProfileMenu}
               aria-haspopup="true"
             >
               <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                <span className="text-sm font-semibold text-primary-foreground">A</span>
+                <span className="text-sm font-semibold text-primary-foreground">
+                  {getSettingsInitials(settings.businessName)}
+                </span>
               </div>
               <div className="text-left hidden sm:block">
-                <p className="text-sm font-medium text-foreground">Admin</p>
-                <p className="text-xs text-muted-foreground">admin@studio.com</p>
+                <p className="text-sm font-medium text-foreground">{settings.businessName}</p>
+                <p className="text-xs text-muted-foreground">{settings.businessEmail}</p>
               </div>
               <ChevronDown className={cn(
                 'w-4 h-4 text-muted-foreground transition-transform',
@@ -141,23 +144,17 @@ export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: He
                   aria-orientation="vertical"
                 >
                   <div className="px-3 py-2 border-b border-border/50 mb-1.5">
-                    <p className="text-sm font-medium text-foreground">Admin User</p>
-                    <p className="text-xs text-muted-foreground">admin@studio.com</p>
+                    <p className="text-sm font-medium text-foreground">{settings.businessName}</p>
+                    <p className="text-xs text-muted-foreground">{settings.businessEmail}</p>
                   </div>
-                  <button
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-                    role="menuitem"
-                  >
-                    <User className="w-4 h-4" aria-hidden="true" />
-                    <span>Profile</span>
-                  </button>
-                  <button
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                  <a
+                    href="/settings"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     role="menuitem"
                   >
                     <Settings className="w-4 h-4" aria-hidden="true" />
                     <span>Settings</span>
-                  </button>
+                  </a>
                   <div className="border-t border-border/50 mt-1.5 pt-1.5">
                     <button
                       onClick={() => authService.logout()}

@@ -66,8 +66,8 @@ export default function ClientsPage() {
               onChange={(e) => setSearch(e.target.value)}
               className={cn(
                 'w-full pl-11 pr-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground placeholder:text-muted-foreground/60',
+                'bg-muted border border-border/50',
+                'text-foreground placeholder:text-muted-foreground',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                 'transition-all'
               )}
@@ -80,7 +80,7 @@ export default function ClientsPage() {
               'text-sm font-medium transition-colors',
               showActiveOnly
                 ? 'bg-primary/10 border-primary/30 text-primary'
-                : 'bg-secondary/50 border-border/50 text-muted-foreground hover:text-foreground'
+                : 'bg-muted border-border/50 text-muted-foreground hover:text-foreground'
             )}
           >
             <Filter className="w-4 h-4" />
