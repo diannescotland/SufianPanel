@@ -5,6 +5,9 @@ color 0B
 :: Change to the directory where this script is located
 cd /d "%~dp0"
 
+:: Add Docker to PATH (fixes PATH issues on some machines)
+set PATH=%PATH%;C:\Program Files\Docker\Docker\resources\bin;%LOCALAPPDATA%\Microsoft\WindowsApps
+
 echo.
 echo ========================================
 echo       SUFIAN PANEL - DESIGN STUDIO
@@ -23,7 +26,7 @@ if not exist "docker-compose.yml" (
     exit /b 1
 )
 
-:: Check if Docker is running (with visible output)
+:: Check if Docker is running
 echo Verification de Docker...
 echo.
 docker version
@@ -35,7 +38,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo ========================================
     echo.
     echo 1. Ouvrez Docker Desktop depuis le menu Demarrer
-    echo 2. Attendez que l'icone devienne VERTE (en bas a droite)
+    echo 2. Attendez que l'icone devienne VERTE
     echo 3. Relancez ce fichier
     echo.
     pause
@@ -52,7 +55,7 @@ echo.
 echo Cela peut prendre 3-5 minutes la premiere fois.
 echo.
 
-:: Start containers with visible output
+:: Start containers
 docker compose up --build
 
 echo.
