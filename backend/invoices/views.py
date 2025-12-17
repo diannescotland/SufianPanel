@@ -1,6 +1,7 @@
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from django.http import HttpResponse
@@ -105,9 +106,9 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
     def pdf(self, request, pk=None):
-        """Generate and view PDF invoice inline."""
+        """Generate and view PDF invoice inline (public endpoint)."""
         import logging
         logger = logging.getLogger(__name__)
 
@@ -127,9 +128,9 @@ class InvoiceViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
     def download_pdf(self, request, pk=None):
-        """Download PDF as attachment."""
+        """Download PDF as attachment (public endpoint)."""
         import logging
         logger = logging.getLogger(__name__)
 
