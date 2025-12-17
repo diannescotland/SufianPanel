@@ -2,6 +2,9 @@
 title Sufian Panel - Starting...
 color 0B
 
+:: Change to the directory where this script is located
+cd /d "%~dp0"
+
 echo.
 echo ========================================
 echo       SUFIAN PANEL - DESIGN STUDIO
@@ -27,8 +30,21 @@ echo Demarrage de l'application...
 echo (Cela peut prendre 1-2 minutes la premiere fois)
 echo.
 
-:: Start containers
-docker-compose up -d
+:: Start containers (try both docker-compose and docker compose)
+docker compose up -d 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    docker-compose up -d
+)
+
+if %ERRORLEVEL% NEQ 0 (
+    color 0C
+    echo.
+    echo [ERREUR] Impossible de demarrer l'application.
+    echo Verifiez que Docker Desktop fonctionne correctement.
+    echo.
+    pause
+    exit /b 1
+)
 
 echo.
 echo ========================================
