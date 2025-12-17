@@ -37,11 +37,13 @@ L'application va demarrer automatiquement. Attendre environ 1-2 minutes la premi
 
 ---
 
-## Etape 5: Utiliser l'Application
+## Etape 5: Se Connecter
 
-Le navigateur s'ouvre automatiquement. Sinon, ouvrir:
+Le navigateur s'ouvre automatiquement. Sinon, ouvrir: **http://localhost:3000**
 
-**http://localhost:3000**
+**Identifiants:**
+- Nom d'utilisateur: `sufianbh26`
+- Mot de passe: `Bigday2626@`
 
 ---
 
