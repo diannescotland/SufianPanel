@@ -10,9 +10,17 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from django.http import JsonResponse
+
+
+def health_check(request):
+    """Public health check endpoint for Docker healthcheck."""
+    return JsonResponse({"status": "healthy"})
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Health check (public, for Docker healthcheck)
+    path("api/health/", health_check, name="health_check"),
     # JWT Authentication
     path("api/auth/login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),

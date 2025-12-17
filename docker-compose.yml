@@ -8,11 +8,15 @@ services:
       - backend_data:/app/data
       - ./backend/media:/app/media
     environment:
-      - DEBUG=True
+      - SECRET_KEY=k1uic_pp0(elssiewv3j-_xvk8nt1ch7f2!tze62qvxe*nwaoe
+      - DEBUG=False
       - CORS_ALLOWED_ORIGINS=http://localhost:3000
+      - DJANGO_SUPERUSER_USERNAME=sufianbh26
+      - DJANGO_SUPERUSER_EMAIL=sufianbh26@example.com
+      - DJANGO_SUPERUSER_PASSWORD=Bigday2626@
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')"]
       interval: 30s
       timeout: 10s
       retries: 3

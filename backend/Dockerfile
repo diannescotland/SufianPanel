@@ -39,6 +39,9 @@ export DATABASE_PATH=/app/data/db.sqlite3\n\
 # Run migrations\n\
 python manage.py migrate --run-syncdb\n\
 \n\
+# Seed admin user\n\
+python manage.py seed_admin 2>/dev/null || true\n\
+\n\
 # Seed tools\n\
 python manage.py seed_tools 2>/dev/null || true\n\
 \n\

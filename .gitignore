@@ -37,11 +37,13 @@ frontend/out/
 .DS_Store
 Thumbs.db
 
-# Environment
-# .env  # Included for client deployment
-# .env.local
-# .env.*.local
-# frontend/.env.local
+# Environment (credentials - never commit!)
+.env
+.env.local
+.env.*.local
+frontend/.env.local
+backend/.env
+!.env.example
 
 # Build
 dist/
