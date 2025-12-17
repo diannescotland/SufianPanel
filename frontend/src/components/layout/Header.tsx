@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useTheme } from '@/providers/theme-provider'
 import { cn } from '@/lib/utils'
 import {
@@ -20,7 +20,7 @@ interface HeaderProps {
   onMenuClick?: () => void
 }
 
-export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
+export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
   const { setTheme, resolvedTheme } = useTheme()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
 
@@ -41,6 +41,7 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
           <button
             onClick={onMenuClick}
             className="lg:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            aria-label="Open navigation menu"
           >
             <Menu className="w-5 h-5 text-muted-foreground" />
           </button>
@@ -55,6 +56,7 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
               'relative flex items-center w-72 rounded-xl',
               'bg-secondary/60 hover:bg-secondary transition-colors'
             )}
+            aria-label="Search (Cmd+K)"
           >
             <Search className="absolute left-4 w-4 h-4 text-muted-foreground" />
             <span className="w-full py-2.5 pl-11 pr-4 text-sm text-muted-foreground/60 text-left">
@@ -72,15 +74,19 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
         {/* Right section */}
         <div className="flex items-center gap-2">
           {/* Notifications */}
-          <button className="relative p-2.5 rounded-xl hover:bg-secondary transition-colors group">
+          <button
+            className="relative p-2.5 rounded-xl hover:bg-secondary transition-colors group"
+            aria-label="View notifications"
+          >
             <Bell className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" aria-hidden="true" />
           </button>
 
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
             className="p-2.5 rounded-xl hover:bg-secondary transition-colors group"
+            aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {resolvedTheme === 'dark' ? (
               <Moon className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -100,6 +106,9 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
                 'flex items-center gap-3 p-1.5 pr-3 rounded-xl',
                 'hover:bg-secondary transition-colors group'
               )}
+              aria-label="Open profile menu"
+              aria-expanded={showProfileMenu}
+              aria-haspopup="true"
             >
               <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
                 <span className="text-sm font-semibold text-primary-foreground">A</span>
@@ -120,27 +129,40 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
                   className="fixed inset-0 z-40"
                   onClick={() => setShowProfileMenu(false)}
                 />
-                <div className={cn(
-                  'absolute right-0 top-full mt-2 z-50 w-56',
-                  'bg-card/95 backdrop-blur-xl rounded-xl',
-                  'border border-border/50 shadow-xl shadow-black/20',
-                  'py-1.5 animate-in fade-in slide-in-from-top-2 duration-200'
-                )}>
+                <div
+                  className={cn(
+                    'absolute right-0 top-full mt-2 z-50 w-56',
+                    'bg-card/95 backdrop-blur-xl rounded-xl',
+                    'border border-border/50 shadow-xl shadow-black/20',
+                    'py-1.5 animate-in fade-in slide-in-from-top-2 duration-200'
+                  )}
+                  role="menu"
+                  aria-orientation="vertical"
+                >
                   <div className="px-3 py-2 border-b border-border/50 mb-1.5">
                     <p className="text-sm font-medium text-foreground">Admin User</p>
                     <p className="text-xs text-muted-foreground">admin@studio.com</p>
                   </div>
-                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                    <User className="w-4 h-4" />
+                  <button
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    role="menuitem"
+                  >
+                    <User className="w-4 h-4" aria-hidden="true" />
                     <span>Profile</span>
                   </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
-                    <Settings className="w-4 h-4" />
+                  <button
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+                    role="menuitem"
+                  >
+                    <Settings className="w-4 h-4" aria-hidden="true" />
                     <span>Settings</span>
                   </button>
                   <div className="border-t border-border/50 mt-1.5 pt-1.5">
-                    <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors">
-                      <LogOut className="w-4 h-4" />
+                    <button
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                      role="menuitem"
+                    >
+                      <LogOut className="w-4 h-4" aria-hidden="true" />
                       <span>Log out</span>
                     </button>
                   </div>
@@ -152,4 +174,4 @@ export function Header({ sidebarCollapsed, onMenuClick }: HeaderProps) {
       </div>
     </header>
   )
-}
+})

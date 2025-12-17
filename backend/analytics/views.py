@@ -11,6 +11,9 @@ from projects.models import Project
 from invoices.models import Invoice, Payment
 from services.models import ServicePricing
 
+# Constants
+DEFAULT_MONTHS_LOOKBACK = 12  # Default number of months for analytics queries
+
 
 class OverviewView(APIView):
     """Dashboard overview statistics."""
@@ -91,7 +94,7 @@ class RevenueAnalyticsView(APIView):
 
     def get(self, request):
         period = request.query_params.get('period', 'monthly')
-        months = int(request.query_params.get('months', 12))
+        months = int(request.query_params.get('months', DEFAULT_MONTHS_LOOKBACK))
 
         end_date = timezone.now()
         start_date = end_date - timedelta(days=months * 30)
@@ -122,7 +125,7 @@ class ClientAnalyticsView(APIView):
     """Client analytics."""
 
     def get(self, request):
-        months = int(request.query_params.get('months', 12))
+        months = int(request.query_params.get('months', DEFAULT_MONTHS_LOOKBACK))
         end_date = timezone.now()
         start_date = end_date - timedelta(days=months * 30)
 

@@ -12,7 +12,8 @@ from .serializers import (
     SubscriptionCreateSerializer,
     CreditUsageSerializer,
     CreditUsageCreateSerializer,
-    ClientServiceSelectionSerializer
+    ClientServiceSelectionSerializer,
+    ClientServiceSelectionCreateSerializer
 )
 from clients.models import Client
 
@@ -34,9 +35,42 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     serializer_class = SubscriptionSerializer
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action in ['create', 'upsert']:
             return SubscriptionCreateSerializer
         return SubscriptionSerializer
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create or update a subscription (upsert behavior).
+        If a subscription for the same tool+billing_month exists, update it.
+        """
+        tool_id = request.data.get('tool')
+        billing_month = request.data.get('billing_month')
+
+        # Check if subscription already exists
+        existing = None
+        if tool_id and billing_month:
+            existing = Subscription.objects.filter(
+                tool_id=tool_id,
+                billing_month=billing_month
+            ).first()
+
+        if existing:
+            # Update existing subscription
+            serializer = self.get_serializer(existing, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            # Refresh from database to get computed fields
+            instance.refresh_from_db()
+            return Response(SubscriptionSerializer(instance).data, status=status.HTTP_200_OK)
+        else:
+            # Create new subscription
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            # Refresh from database to get computed fields
+            instance.refresh_from_db()
+            return Response(SubscriptionSerializer(instance).data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'])
     def current_month(self, request):
@@ -93,7 +127,7 @@ class CreditUsageViewSet(viewsets.ModelViewSet):
         client_id = request.query_params.get('client_id')
         if not client_id:
             return Response(
-                {'error': 'client_id requis'},
+                {'error': 'client_id is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -136,7 +170,7 @@ class CreditUsageViewSet(viewsets.ModelViewSet):
 
         if not tool_id or not client_id:
             return Response(
-                {'error': 'tool_id et client_id sont requis'},
+                {'error': 'tool_id and client_id are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -152,7 +186,7 @@ class CreditUsageViewSet(viewsets.ModelViewSet):
 
         if not subscription:
             return Response(
-                {'error': 'Aucun abonnement actif trouvé pour cet outil ce mois'},
+                {'error': 'No active subscription found for this tool this month'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
@@ -175,13 +209,49 @@ class ClientServiceSelectionViewSet(viewsets.ModelViewSet):
     queryset = ClientServiceSelection.objects.all()
     serializer_class = ClientServiceSelectionSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return ClientServiceSelectionCreateSerializer
+        return ClientServiceSelectionSerializer
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create or update a client service selection (upsert behavior).
+        If a selection for the same client+tool exists, update it.
+        """
+        client_id = request.data.get('client')
+        tool_id = request.data.get('tool')
+
+        # Check if selection already exists
+        existing = None
+        if client_id and tool_id:
+            existing = ClientServiceSelection.objects.filter(
+                client_id=client_id,
+                tool_id=tool_id
+            ).first()
+
+        if existing:
+            # Update existing selection
+            serializer = self.get_serializer(existing, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            instance.refresh_from_db()
+            return Response(ClientServiceSelectionSerializer(instance).data, status=status.HTTP_200_OK)
+        else:
+            # Create new selection
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            instance = serializer.save()
+            instance.refresh_from_db()
+            return Response(ClientServiceSelectionSerializer(instance).data, status=status.HTTP_201_CREATED)
+
     @action(detail=False, methods=['get'])
     def by_client(self, request):
         """Get active service selections for a client."""
         client_id = request.query_params.get('client_id')
         if not client_id:
             return Response(
-                {'error': 'client_id requis'},
+                {'error': 'client_id is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -201,7 +271,7 @@ class ClientServiceSelectionViewSet(viewsets.ModelViewSet):
 
         if not client_id:
             return Response(
-                {'error': 'client_id requis'},
+                {'error': 'client_id is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -232,41 +302,56 @@ class CostAnalyticsView(APIView):
     """Analytics endpoints for cost tracking."""
 
     def get(self, request):
-        """Get cost summary for all clients."""
-        summaries = []
+        """Get cost summary for all clients - optimized with single query."""
+        # Get all usages with client and tool info in single query
+        client_totals = CreditUsage.objects.filter(
+            client__is_active=True
+        ).values(
+            'client__id', 'client__name', 'client__company'
+        ).annotate(
+            total_cost_mad=Sum('calculated_cost_mad'),
+            total_credits_used=Sum('credits_used'),
+            total_items_generated=Sum('items_generated')
+        ).order_by('-total_cost_mad')
 
-        for client in Client.objects.filter(is_active=True):
-            usages = CreditUsage.objects.filter(client=client)
+        # Get breakdown by tool for each client in one query
+        tool_breakdown = CreditUsage.objects.filter(
+            client__is_active=True
+        ).values(
+            'client__id',
+            tool_name=F('subscription__tool__display_name')
+        ).annotate(
+            cost_mad=Sum('calculated_cost_mad'),
+            credits=Sum('credits_used'),
+            items=Sum('items_generated')
+        )
 
-            # Use final_cost which respects manual overrides
-            total_cost = sum(u.final_cost_mad for u in usages)
-
-            totals = usages.aggregate(
-                total_credits=Sum('credits_used'),
-                total_items=Sum('items_generated')
-            )
-
-            # Breakdown by tool
-            breakdown = usages.values(
-                tool_name=F('subscription__tool__display_name')
-            ).annotate(
-                cost_mad=Sum('calculated_cost_mad'),
-                credits=Sum('credits_used'),
-                items=Sum('items_generated')
-            )
-
-            summaries.append({
-                'client_id': str(client.id),
-                'client_name': client.name,
-                'company': client.company,
-                'total_cost_mad': float(total_cost),
-                'total_credits_used': totals['total_credits'] or 0,
-                'total_items_generated': totals['total_items'] or 0,
-                'breakdown_by_tool': list(breakdown)
+        # Build breakdown lookup
+        breakdown_by_client = {}
+        for item in tool_breakdown:
+            client_id = str(item['client__id'])
+            if client_id not in breakdown_by_client:
+                breakdown_by_client[client_id] = []
+            breakdown_by_client[client_id].append({
+                'tool_name': item['tool_name'],
+                'cost_mad': item['cost_mad'] or 0,
+                'credits': item['credits'] or 0,
+                'items': item['items'] or 0,
             })
 
-        # Sort by cost descending
-        summaries.sort(key=lambda x: x['total_cost_mad'], reverse=True)
+        # Build response
+        summaries = []
+        for client in client_totals:
+            client_id = str(client['client__id'])
+            summaries.append({
+                'client_id': client_id,
+                'client_name': client['client__name'],
+                'company': client['client__company'],
+                'total_cost_mad': float(client['total_cost_mad'] or 0),
+                'total_credits_used': client['total_credits_used'] or 0,
+                'total_items_generated': client['total_items_generated'] or 0,
+                'breakdown_by_tool': breakdown_by_client.get(client_id, [])
+            })
 
         return Response(summaries)
 

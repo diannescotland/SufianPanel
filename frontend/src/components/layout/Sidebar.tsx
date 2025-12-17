@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -36,7 +37,7 @@ interface SidebarProps {
   onCollapse?: (collapsed: boolean) => void
 }
 
-export function Sidebar({ mobileOpen, onMobileClose, collapsed = false, onCollapse }: SidebarProps) {
+export const Sidebar = memo(function Sidebar({ mobileOpen, onMobileClose, collapsed = false, onCollapse }: SidebarProps) {
   const pathname = usePathname()
 
   return (
@@ -89,14 +90,15 @@ export function Sidebar({ mobileOpen, onMobileClose, collapsed = false, onCollap
             <button
               onClick={onMobileClose}
               className="lg:hidden p-2 rounded-lg hover:bg-sidebar-accent text-muted-foreground hover:text-sidebar-foreground transition-colors"
+              aria-label="Close navigation menu"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           )}
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto scrollbar-hide">
+        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto scrollbar-hide" aria-label="Main navigation">
           {navItems.map((item) => {
             const isActive = pathname === item.href ||
               (item.href !== '/' && pathname.startsWith(item.href))
@@ -112,6 +114,7 @@ export function Sidebar({ mobileOpen, onMobileClose, collapsed = false, onCollap
                   'hover:bg-sidebar-accent',
                   isActive && 'bg-sidebar-accent'
                 )}
+                aria-current={isActive ? 'page' : undefined}
               >
                 {/* Active indicator */}
                 {isActive && (
@@ -158,12 +161,14 @@ export function Sidebar({ mobileOpen, onMobileClose, collapsed = false, onCollap
               'bg-sidebar-accent/50 hover:bg-sidebar-accent transition-colors',
               'text-muted-foreground hover:text-sidebar-foreground'
             )}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-expanded={!collapsed}
           >
             {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             ) : (
               <>
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                 <span className="text-xs font-medium">Collapse</span>
               </>
             )}
@@ -172,4 +177,4 @@ export function Sidebar({ mobileOpen, onMobileClose, collapsed = false, onCollap
       </div>
     </aside>
   )
-}
+})

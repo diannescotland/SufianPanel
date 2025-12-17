@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { useQuery } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { invoicesService } from '@/services/invoices'
 import { formatCurrency, formatDate, getStatusColor, cn } from '@/lib/utils'
 import {
@@ -35,29 +36,46 @@ const statusIcons: Record<PaymentStatus, typeof CheckCircle2> = {
   overdue: AlertCircle,
 }
 
+// Debounce delay in milliseconds
+const SEARCH_DEBOUNCE_MS = 300
+
 export default function InvoicesPage() {
+  const router = useRouter()
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | 'all'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
 
+  // Debounce search input to avoid excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search)
+    }, SEARCH_DEBOUNCE_MS)
+
+    return () => clearTimeout(timer)
+  }, [search])
+
   const { data: invoicesData, isLoading } = useQuery({
-    queryKey: ['invoices', { search, payment_status: statusFilter === 'all' ? undefined : statusFilter }],
+    queryKey: ['invoices', { search: debouncedSearch, payment_status: statusFilter === 'all' ? undefined : statusFilter }],
     queryFn: () => invoicesService.getAll({
-      search: search || undefined,
+      search: debouncedSearch || undefined,
       payment_status: statusFilter === 'all' ? undefined : statusFilter,
     }),
   })
 
   const invoices = invoicesData?.results || []
 
-  // Calculate totals
-  const totals = invoices.reduce(
-    (acc, inv) => ({
-      total: acc.total + inv.total_amount,
-      paid: acc.paid + inv.amount_paid,
-      outstanding: acc.outstanding + (inv.total_amount - inv.amount_paid),
-    }),
-    { total: 0, paid: 0, outstanding: 0 }
+  // Calculate totals with useMemo to avoid recalculation on every render
+  const totals = useMemo(() =>
+    invoices.reduce(
+      (acc, inv) => ({
+        total: acc.total + inv.total_amount,
+        paid: acc.paid + inv.amount_paid,
+        outstanding: acc.outstanding + (inv.total_amount - inv.amount_paid),
+      }),
+      { total: 0, paid: 0, outstanding: 0 }
+    ),
+    [invoices]
   )
 
   return (
@@ -352,7 +370,7 @@ export default function InvoicesPage() {
                       <tr
                         key={invoice.id}
                         className="hover:bg-secondary/30 transition-colors cursor-pointer"
-                        onClick={() => window.location.href = `/invoices/${invoice.id}`}
+                        onClick={() => router.push(`/invoices/${invoice.id}`)}
                       >
                         <td className="px-5 py-4">
                           <div>

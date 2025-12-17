@@ -305,7 +305,7 @@ npm run dev                    # http://localhost:3000
 # Or close terminal windows
 ```
 
-**Admin:** http://localhost:8000/admin/ (admin / admin123)
+**Admin:** http://localhost:8000/admin/ (credentials in environment or .env file)
 
 ---
 

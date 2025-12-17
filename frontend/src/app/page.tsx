@@ -71,10 +71,10 @@ export default function DashboardPage() {
         {/* Page header */}
         <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-            Welcome back
+            Dashboard
           </h1>
           <p className="text-muted-foreground">
-            Here&apos;s what&apos;s happening with your design business today.
+            Here&apos;s what&apos;s happening with your business today.
           </p>
         </div>
 

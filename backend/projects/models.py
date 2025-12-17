@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.utils import timezone
 from clients.models import Client
 
 
@@ -34,20 +35,24 @@ class Project(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['deadline']),
+            models.Index(fields=['client', 'status']),
+            models.Index(fields=['client', 'deadline']),
+        ]
 
     def __str__(self):
         return f"{self.title} - {self.client.name}"
 
     @property
     def is_overdue(self):
-        from django.utils import timezone
         if self.status in ['completed', 'cancelled']:
             return False
         return timezone.now() > self.deadline
 
     @property
     def days_until_deadline(self):
-        from django.utils import timezone
         if self.status in ['completed', 'cancelled']:
             return None
         delta = self.deadline - timezone.now()

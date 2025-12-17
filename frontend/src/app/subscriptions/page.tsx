@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   subscriptionsService,
   subscriptionAnalyticsService,
   aiToolsService,
-  creditUsageService,
 } from '@/services/subscriptions'
 import { clientsService } from '@/services/clients'
 import { formatCurrency, cn } from '@/lib/utils'
@@ -21,11 +20,17 @@ import {
   Music,
   TrendingUp,
   Users,
-  X,
-  Check,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import Link from 'next/link'
-import { GenerationType } from '@/types'
+import {
+  AddSubscriptionModal,
+  LogUsageModal,
+  EditSubscriptionModal,
+  DeleteSubscriptionModal,
+} from './subscription-modals'
+import { GenerationType, Subscription } from '@/types'
 
 const toolTypeIcons = {
   image: Image,
@@ -38,6 +43,8 @@ export default function SubscriptionsPage() {
   const queryClient = useQueryClient()
   const [showAddModal, setShowAddModal] = useState(false)
   const [showLogModal, setShowLogModal] = useState(false)
+  const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null)
+  const [deletingSubscription, setDeletingSubscription] = useState<Subscription | null>(null)
 
   // Fetch data
   const { data: monthlyOverview, isLoading: loadingOverview } = useQuery({
@@ -146,7 +153,7 @@ export default function SubscriptionsPage() {
                     return (
                       <div
                         key={sub.id}
-                        className="rounded-xl bg-card/50 border border-border/50 p-5 hover:border-border transition-colors"
+                        className="rounded-xl bg-card/50 border border-border/50 p-5 hover:border-border transition-colors group"
                       >
                         <div className="flex items-start gap-4">
                           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -159,6 +166,23 @@ export default function SubscriptionsPage() {
                             <p className="text-sm text-muted-foreground">
                               {sub.tool_type}
                             </p>
+                          </div>
+                          {/* Edit/Delete buttons */}
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setEditingSubscription(sub)}
+                              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                              title="Edit"
+                            >
+                              <Pencil className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                            </button>
+                            <button
+                              onClick={() => setDeletingSubscription(sub)}
+                              className="p-2 rounded-lg hover:bg-destructive/10 transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                            </button>
                           </div>
                         </div>
                         <div className="mt-4 pt-4 border-t border-border/50">
@@ -319,424 +343,30 @@ export default function SubscriptionsPage() {
           }}
         />
       )}
+
+      {/* Edit Subscription Modal */}
+      {editingSubscription && (
+        <EditSubscriptionModal
+          subscription={editingSubscription}
+          onClose={() => setEditingSubscription(null)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+            setEditingSubscription(null)
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingSubscription && (
+        <DeleteSubscriptionModal
+          subscription={deletingSubscription}
+          onClose={() => setDeletingSubscription(null)}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['subscriptions'] })
+            setDeletingSubscription(null)
+          }}
+        />
+      )}
     </DashboardLayout>
-  )
-}
-
-// Add Subscription Modal Component
-function AddSubscriptionModal({
-  tools,
-  onClose,
-  onSuccess,
-}: {
-  tools: { id: string; display_name: string; tool_type: string }[]
-  onClose: () => void
-  onSuccess: () => void
-}) {
-  const [toolId, setToolId] = useState('')
-  const [costMad, setCostMad] = useState('')
-  const [totalCredits, setTotalCredits] = useState('')
-  const [notes, setNotes] = useState('')
-
-  const createMutation = useMutation({
-    mutationFn: subscriptionsService.create,
-    onSuccess,
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!toolId || !costMad) return
-
-    const today = new Date()
-    const billingMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-      .toISOString()
-      .split('T')[0]
-
-    createMutation.mutate({
-      tool: toolId,
-      billing_month: billingMonth,
-      total_cost_mad: parseFloat(costMad),
-      total_credits: totalCredits ? parseInt(totalCredits) : undefined,
-      notes,
-    })
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-card rounded-2xl border border-border shadow-xl w-full max-w-md mx-4 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-foreground">Add Subscription</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-secondary transition-colors"
-          >
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              AI Tool
-            </label>
-            <select
-              value={toolId}
-              onChange={(e) => setToolId(e.target.value)}
-              required
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            >
-              <option value="">Select a tool...</option>
-              {tools.map((tool) => (
-                <option key={tool.id} value={tool.id}>
-                  {tool.display_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Monthly Cost (MAD)
-            </label>
-            <input
-              type="number"
-              value={costMad}
-              onChange={(e) => setCostMad(e.target.value)}
-              required
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground placeholder:text-muted-foreground/60',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Total Credits (optional)
-            </label>
-            <input
-              type="number"
-              value={totalCredits}
-              onChange={(e) => setTotalCredits(e.target.value)}
-              min="0"
-              placeholder="Leave empty if unlimited"
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground placeholder:text-muted-foreground/60',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Notes (optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              placeholder="Any notes about this subscription..."
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl resize-none',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground placeholder:text-muted-foreground/60',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            />
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className={cn(
-                'flex-1 px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50 text-foreground font-medium',
-                'hover:bg-secondary transition-colors'
-              )}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending}
-              className={cn(
-                'flex-1 px-4 py-2.5 rounded-xl',
-                'bg-primary text-primary-foreground font-medium',
-                'hover:bg-primary/90 transition-colors',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
-              )}
-            >
-              {createMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-              ) : (
-                'Add Subscription'
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-// Log Usage Modal Component
-function LogUsageModal({
-  tools,
-  clients,
-  onClose,
-  onSuccess,
-}: {
-  tools: { id: string; display_name: string; tool_type: string }[]
-  clients: { id: string; name: string }[]
-  onClose: () => void
-  onSuccess: () => void
-}) {
-  const [toolId, setToolId] = useState('')
-  const [clientId, setClientId] = useState('')
-  const [generationType, setGenerationType] = useState<GenerationType>('image')
-  const [itemsGenerated, setItemsGenerated] = useState('1')
-  const [creditsUsed, setCreditsUsed] = useState('')
-  const [videoSeconds, setVideoSeconds] = useState('')
-  const [description, setDescription] = useState('')
-
-  const logMutation = useMutation({
-    mutationFn: creditUsageService.logGeneration,
-    onSuccess,
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!toolId || !clientId) return
-
-    logMutation.mutate({
-      tool_id: toolId,
-      client_id: clientId,
-      generation_type: generationType,
-      items_generated: parseInt(itemsGenerated) || 1,
-      credits_used: creditsUsed ? parseInt(creditsUsed) : undefined,
-      video_seconds: videoSeconds ? parseInt(videoSeconds) : undefined,
-      description,
-    })
-  }
-
-  const selectedTool = tools.find((t) => t.id === toolId)
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-card rounded-2xl border border-border shadow-xl w-full max-w-md mx-4 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-foreground">Log Generation</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-secondary transition-colors"
-          >
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              AI Tool
-            </label>
-            <select
-              value={toolId}
-              onChange={(e) => {
-                setToolId(e.target.value)
-                const tool = tools.find((t) => t.id === e.target.value)
-                if (tool?.tool_type === 'video') setGenerationType('video')
-                else if (tool?.tool_type === 'audio') setGenerationType('audio')
-                else setGenerationType('image')
-              }}
-              required
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            >
-              <option value="">Select a tool...</option>
-              {tools.map((tool) => (
-                <option key={tool.id} value={tool.id}>
-                  {tool.display_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Client
-            </label>
-            <select
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              required
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            >
-              <option value="">Select a client...</option>
-              {clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Type
-              </label>
-              <select
-                value={generationType}
-                onChange={(e) => setGenerationType(e.target.value as GenerationType)}
-                className={cn(
-                  'w-full px-4 py-2.5 rounded-xl',
-                  'bg-secondary/50 border border-border/50',
-                  'text-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20'
-                )}
-              >
-                <option value="image">Image</option>
-                <option value="video">Video</option>
-                <option value="audio">Audio</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Items Generated
-              </label>
-              <input
-                type="number"
-                value={itemsGenerated}
-                onChange={(e) => setItemsGenerated(e.target.value)}
-                min="1"
-                className={cn(
-                  'w-full px-4 py-2.5 rounded-xl',
-                  'bg-secondary/50 border border-border/50',
-                  'text-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20'
-                )}
-              />
-            </div>
-          </div>
-
-          {selectedTool?.tool_type === 'video' && (
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Video Duration (seconds)
-              </label>
-              <input
-                type="number"
-                value={videoSeconds}
-                onChange={(e) => setVideoSeconds(e.target.value)}
-                min="0"
-                placeholder="e.g., 30"
-                className={cn(
-                  'w-full px-4 py-2.5 rounded-xl',
-                  'bg-secondary/50 border border-border/50',
-                  'text-foreground placeholder:text-muted-foreground/60',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/20'
-                )}
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Credits Used (optional)
-            </label>
-            <input
-              type="number"
-              value={creditsUsed}
-              onChange={(e) => setCreditsUsed(e.target.value)}
-              min="0"
-              placeholder="Leave empty for auto-calculation"
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground placeholder:text-muted-foreground/60',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Description (optional)
-            </label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="e.g., Product images for campaign"
-              className={cn(
-                'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
-                'text-foreground placeholder:text-muted-foreground/60',
-                'focus:outline-none focus:ring-2 focus:ring-primary/20'
-              )}
-            />
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className={cn(
-                'flex-1 px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50 text-foreground font-medium',
-                'hover:bg-secondary transition-colors'
-              )}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={logMutation.isPending}
-              className={cn(
-                'flex-1 px-4 py-2.5 rounded-xl',
-                'bg-primary text-primary-foreground font-medium',
-                'hover:bg-primary/90 transition-colors',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
-              )}
-            >
-              {logMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-              ) : (
-                <span className="flex items-center justify-center gap-2">
-                  <Check className="w-4 h-4" />
-                  Log Usage
-                </span>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
   )
 }

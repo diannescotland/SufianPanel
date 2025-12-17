@@ -28,9 +28,10 @@ import {
 
 // Validation schema
 const invoiceItemSchema = z.object({
-  description: z.string().min(1, 'Description is required'),
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().optional(),
   quantity: z.number().min(1, 'Quantity must be at least 1'),
-  unit_price: z.number().min(0, 'Price must be positive'),
+  unit_price: z.number().min(0.01, 'Price must be greater than 0'),
 })
 
 const invoiceSchema = z.object({
@@ -43,7 +44,7 @@ const invoiceSchema = z.object({
 
 type InvoiceFormData = z.infer<typeof invoiceSchema>
 
-// Type for the create API
+// Type for the create API - matches backend InvoiceCreateSerializer
 interface InvoiceCreatePayload {
   client: string
   project: string
@@ -51,7 +52,8 @@ interface InvoiceCreatePayload {
   notes?: string
   total_amount: number
   items: Array<{
-    description: string
+    title: string
+    description?: string
     quantity: number
     unit_price: number
   }>
@@ -86,7 +88,7 @@ export default function NewInvoicePage() {
       project: preselectedProjectId || '',
       due_date: defaultDueDateStr,
       notes: '',
-      items: [{ description: '', quantity: 1, unit_price: 0 }],
+      items: [{ title: '', description: '', quantity: 1, unit_price: 0 }],
     },
   })
 
@@ -137,12 +139,13 @@ export default function NewInvoicePage() {
         notes: data.notes,
         total_amount: total,
         items: data.items.map(item => ({
+          title: item.title,
           description: item.description,
           quantity: item.quantity,
           unit_price: item.unit_price,
         })),
       }
-      return invoicesService.create(payload as any)
+      return invoicesService.create(payload)
     },
     onSuccess: (newInvoice) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] })
@@ -295,7 +298,7 @@ export default function NewInvoicePage() {
               <h3 className="font-semibold text-foreground">Line Items</h3>
               <button
                 type="button"
-                onClick={() => append({ description: '', quantity: 1, unit_price: 0 })}
+                onClick={() => append({ title: '', description: '', quantity: 1, unit_price: 0 })}
                 className={cn(
                   'inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium',
                   'bg-primary/10 text-primary hover:bg-primary/20 transition-colors'
@@ -313,7 +316,7 @@ export default function NewInvoicePage() {
             <div className="space-y-4">
               {/* Header */}
               <div className="grid grid-cols-12 gap-3 text-xs font-medium text-muted-foreground uppercase tracking-wider px-1">
-                <div className="col-span-6">Description</div>
+                <div className="col-span-6">Service / Item</div>
                 <div className="col-span-2">Qty</div>
                 <div className="col-span-2">Price</div>
                 <div className="col-span-2 text-right">Total</div>
@@ -327,23 +330,23 @@ export default function NewInvoicePage() {
 
                 return (
                   <div key={field.id} className="grid grid-cols-12 gap-3 items-start">
-                    {/* Description */}
+                    {/* Title (main line item) */}
                     <div className="col-span-6">
                       <input
-                        {...register(`items.${index}.description`)}
+                        {...register(`items.${index}.title`)}
                         type="text"
-                        placeholder="Service description..."
+                        placeholder="Service name or item..."
                         className={cn(
                           'w-full px-4 py-2.5 rounded-xl',
                           'bg-secondary/50 border',
                           'text-foreground placeholder:text-muted-foreground/60 text-sm',
                           'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
-                          errors.items?.[index]?.description ? 'border-destructive/50' : 'border-border/50'
+                          errors.items?.[index]?.title ? 'border-destructive/50' : 'border-border/50'
                         )}
                       />
-                      {errors.items?.[index]?.description && (
+                      {errors.items?.[index]?.title && (
                         <p className="mt-1 text-xs text-destructive">
-                          {errors.items[index]?.description?.message}
+                          {errors.items[index]?.title?.message}
                         </p>
                       )}
                     </div>

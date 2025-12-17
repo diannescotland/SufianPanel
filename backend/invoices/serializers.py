@@ -1,8 +1,16 @@
 from rest_framework import serializers
+from decimal import Decimal
 from .models import Invoice, InvoiceItem, Payment
 
 
 class InvoiceItemSerializer(serializers.ModelSerializer):
+    # Add validation for numeric fields
+    quantity = serializers.IntegerField(min_value=1, max_value=10000)
+    unit_price = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        min_value=Decimal('0.00'), max_value=Decimal('9999999.99')
+    )
+
     class Meta:
         model = InvoiceItem
         fields = ['id', 'service', 'title', 'description', 'quantity', 'unit_price', 'total_price']
@@ -11,6 +19,11 @@ class InvoiceItemSerializer(serializers.ModelSerializer):
 
 class PaymentSerializer(serializers.ModelSerializer):
     payment_method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
+    # Add validation for payment amount
+    amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        min_value=Decimal('0.01'), max_value=Decimal('9999999.99')
+    )
 
     class Meta:
         model = Payment
@@ -31,6 +44,21 @@ class InvoiceSerializer(serializers.ModelSerializer):
     is_overdue = serializers.ReadOnlyField()
     items = InvoiceItemSerializer(many=True, read_only=True)
     payments = PaymentSerializer(many=True, read_only=True)
+    # Add validation for numeric fields
+    total_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        min_value=Decimal('0.00'), max_value=Decimal('9999999.99')
+    )
+    deposit_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        min_value=Decimal('0.00'), max_value=Decimal('9999999.99'),
+        required=False, allow_null=True
+    )
+    tva_rate = serializers.DecimalField(
+        max_digits=5, decimal_places=2,
+        min_value=Decimal('0.00'), max_value=Decimal('100.00'),
+        required=False
+    )
 
     class Meta:
         model = Invoice
@@ -64,13 +92,30 @@ class InvoiceListSerializer(serializers.ModelSerializer):
 class InvoiceCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating invoices with items."""
     items = InvoiceItemSerializer(many=True, required=False)
+    invoice_number = serializers.ReadOnlyField()
+    # Add validation for numeric fields
+    total_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        min_value=Decimal('0.00'), max_value=Decimal('9999999.99')
+    )
+    deposit_amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        min_value=Decimal('0.00'), max_value=Decimal('9999999.99'),
+        required=False, allow_null=True
+    )
+    tva_rate = serializers.DecimalField(
+        max_digits=5, decimal_places=2,
+        min_value=Decimal('0.00'), max_value=Decimal('100.00'),
+        required=False
+    )
 
     class Meta:
         model = Invoice
         fields = [
-            'project', 'client', 'total_amount', 'deposit_amount', 'tva_rate',
+            'id', 'invoice_number', 'project', 'client', 'total_amount', 'deposit_amount', 'tva_rate',
             'due_date', 'notes', 'items'
         ]
+        read_only_fields = ['id', 'invoice_number']
 
     def create(self, validated_data):
         items_data = validated_data.pop('items', [])

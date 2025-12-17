@@ -7,6 +7,9 @@ from datetime import timedelta
 from .models import Project
 from .serializers import ProjectSerializer, ProjectListSerializer, ProjectDetailSerializer
 
+# Constants
+DEFAULT_DEADLINE_DAYS = 7  # Default number of days for deadline queries
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -27,7 +30,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def deadlines(self, request):
         """Get upcoming deadlines."""
-        days = int(request.query_params.get('days', 7))
+        days = int(request.query_params.get('days', DEFAULT_DEADLINE_DAYS))
         now = timezone.now()
         deadline_date = now + timedelta(days=days)
 

@@ -17,7 +17,7 @@ env/
 # Django
 *.log
 local_settings.py
-db.sqlite3
+# db.sqlite3  # Included for client deployment
 media/
 staticfiles/
 
@@ -38,10 +38,10 @@ frontend/out/
 Thumbs.db
 
 # Environment
-.env
-.env.local
-.env.*.local
-frontend/.env.local
+# .env  # Included for client deployment
+# .env.local
+# .env.*.local
+# frontend/.env.local
 
 # Build
 dist/

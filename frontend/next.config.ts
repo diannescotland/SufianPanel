@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname, '..'),
   },
-  reactStrictMode: false, // Disable double-rendering in dev
+  reactStrictMode: true, // Enable strict mode for better error detection
   experimental: {
     optimizePackageImports: ['lucide-react', 'recharts', '@tanstack/react-query'],
   },

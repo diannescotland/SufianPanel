@@ -16,8 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Design Studio Dashboard",
-  description: "AI-powered graphic design client management dashboard",
+  title: "Sufian Panel",
+  description: "Client Management System",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -32,11 +35,15 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                var theme = localStorage.getItem('theme') || 'dark';
-                if (theme === 'system') {
-                  theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                try {
+                  var theme = localStorage.getItem('theme') || 'dark';
+                  if (theme === 'system') {
+                    theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  }
+                  document.documentElement.classList.add(theme);
+                } catch (e) {
+                  document.documentElement.classList.add('dark');
                 }
-                document.documentElement.classList.add(theme);
               })();
             `,
           }}

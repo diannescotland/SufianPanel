@@ -5,6 +5,9 @@ from django.utils import timezone
 from clients.models import Client
 from projects.models import Project
 
+# Constants
+BASELINE_ITEMS_PER_MONTH = 100  # Estimated items per month for cost calculation fallback
+
 
 class AITool(models.Model):
     """Available AI tools with default pricing."""
@@ -185,6 +188,11 @@ class Subscription(models.Model):
         unique_together = ['tool', 'billing_month']
         verbose_name = "Abonnement"
         verbose_name_plural = "Abonnements"
+        indexes = [
+            models.Index(fields=['billing_month']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['tool', 'billing_month']),
+        ]
 
     def __str__(self):
         return f"{self.tool.display_name} - {self.billing_month.strftime('%B %Y')}"
@@ -277,6 +285,12 @@ class CreditUsage(models.Model):
         ordering = ['-usage_date']
         verbose_name = "Utilisation"
         verbose_name_plural = "Utilisations"
+        indexes = [
+            models.Index(fields=['client']),
+            models.Index(fields=['subscription']),
+            models.Index(fields=['usage_date']),
+            models.Index(fields=['client', 'usage_date']),
+        ]
 
     def __str__(self):
         return f"{self.client.name} - {self.subscription.tool.display_name} ({self.items_generated} items)"
@@ -314,8 +328,7 @@ class CreditUsage(models.Model):
 
         # Fallback: Estimate based on item count
         if self.subscription.total_cost_mad > 0:
-            # Assume ~100 items per month as baseline
-            return (self.subscription.total_cost_mad / 100) * self.items_generated
+            return (self.subscription.total_cost_mad / BASELINE_ITEMS_PER_MONTH) * self.items_generated
 
         return Decimal('0')
 

@@ -1,10 +1,16 @@
 import uuid
+import re
 from django.db import models
+from django.db.models import Max
+from django.db.models.functions import Cast, Substr, Length
 from django.utils import timezone
 from django.db import transaction
 from clients.models import Client
 from projects.models import Project
 from services.models import Service
+
+# Constants
+INVOICE_START_NUMBER = 8  # Invoice numbers start at 9 (8 + 1)
 
 
 class Invoice(models.Model):
@@ -100,22 +106,21 @@ class Invoice(models.Model):
             from datetime import datetime
             current_month = datetime.now().month
             prefix = f'SB{current_month}-'
+            prefix_len = len(prefix)
 
             with transaction.atomic():
-                # Get all invoices for current month and find the highest number
-                invoices = Invoice.objects.select_for_update().filter(
+                # Use Max() aggregation for O(1) lookup instead of O(n) iteration
+                # Extract the numeric part after the prefix and find the maximum
+                result = Invoice.objects.select_for_update().filter(
                     invoice_number__startswith=prefix
+                ).annotate(
+                    # Extract the number after "SB{month}-"
+                    num_str=Substr('invoice_number', prefix_len + 1)
+                ).aggregate(
+                    max_num=Max(Cast('num_str', models.IntegerField()))
                 )
 
-                max_num = 8  # Start at 9 (8 + 1)
-                for inv in invoices:
-                    try:
-                        num = int(inv.invoice_number.split('-')[1])
-                        if num > max_num:
-                            max_num = num
-                    except (ValueError, IndexError):
-                        pass
-
+                max_num = result['max_num'] if result['max_num'] is not None else INVOICE_START_NUMBER
                 self.invoice_number = f'{prefix}{max_num + 1}'
 
         super().save(*args, **kwargs)

@@ -5,12 +5,22 @@ Django settings for config project.
 from pathlib import Path
 from datetime import timedelta
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
+# In production, SECRET_KEY must be set via environment variable
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if os.environ.get('DEBUG', 'True').lower() == 'true':
+        SECRET_KEY = 'django-insecure-dev-key-for-local-development-only'
+    else:
+        raise ValueError("SECRET_KEY environment variable must be set in production")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
@@ -104,7 +114,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins in development
+# In production, set CORS_ALLOWED_ORIGINS environment variable (comma-separated)
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 # REST Framework settings
@@ -114,7 +125,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",  # TODO: Change to IsAuthenticated when login is implemented
+        "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -133,3 +144,23 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# Security settings (enabled in production only)
+if not DEBUG:
+    # HTTPS/SSL settings
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Cookie security
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Content security
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'

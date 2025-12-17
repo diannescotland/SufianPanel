@@ -110,11 +110,37 @@ interface RetryConfig extends InternalAxiosRequestConfig {
   _retryCount?: number
 }
 
+// Safe localStorage access (handles private browsing mode)
+const safeGetItem = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    // localStorage may throw in private browsing mode
+    return null
+  }
+}
+
+const safeSetItem = (key: string, value: string): void => {
+  try {
+    localStorage.setItem(key, value)
+  } catch {
+    // Silently fail in private browsing mode
+  }
+}
+
+const safeRemoveItem = (key: string): void => {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    // Silently fail in private browsing mode
+  }
+}
+
 // Request interceptor for adding auth token
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token')
+      const token = safeGetItem('access_token')
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }
@@ -142,21 +168,21 @@ api.interceptors.response.use(
 
       try {
         if (typeof window !== 'undefined') {
-          const refreshToken = localStorage.getItem('refresh_token')
+          const refreshToken = safeGetItem('refresh_token')
           if (refreshToken) {
             const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
               refresh: refreshToken,
             })
             const { access } = response.data
-            localStorage.setItem('access_token', access)
+            safeSetItem('access_token', access)
             originalRequest.headers.Authorization = `Bearer ${access}`
             return api(originalRequest)
           }
         }
       } catch (refreshError) {
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
+          safeRemoveItem('access_token')
+          safeRemoveItem('refresh_token')
           window.location.href = '/login'
         }
       }
