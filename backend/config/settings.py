@@ -80,10 +80,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
+# Use DATABASE_PATH env var if set (for Docker), otherwise use default
+DATABASE_PATH = os.environ.get('DATABASE_PATH', BASE_DIR / "db.sqlite3")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": DATABASE_PATH,
     }
 }
 

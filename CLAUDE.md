@@ -53,9 +53,9 @@ frontend/src/
 └── lib/utils.ts      # Helpers
 
 Root files:
-├── start.bat         # One-click start (Windows)
-├── stop.bat          # Stop all services (Windows)
-└── SB LOGO 4.4.svg   # Main logo
+├── docker-compose.yml  # Docker orchestration
+├── Dockerfile          # (in backend/ and frontend/)
+└── SB LOGO 4.4.svg     # Main logo
 ```
 
 ---
@@ -278,13 +278,29 @@ python manage.py migrate_invoice_numbers --dry-run  # Preview changes only
 
 ## Running the App
 
-### Quick Start (Windows)
+### Docker (Recommended)
+No Python or Node.js installation required - just Docker.
+
 ```bash
-# Double-click start.bat
-# Opens http://localhost:3000 automatically
+# Start all services
+docker-compose up
+
+# Start in background
+docker-compose up -d
+
+# Stop services
+docker-compose down
+
+# Rebuild after changes
+docker-compose up --build
 ```
 
-### Manual Start
+**URLs:**
+- Dashboard: http://localhost:3000
+- Backend API: http://localhost:8000
+- Admin: http://localhost:8000/admin/
+
+### Manual Start (Development)
 ```bash
 # Backend
 cd backend
@@ -293,19 +309,11 @@ python manage.py migrate
 python manage.py seed_tools    # Seed AI tools
 python manage.py runserver     # http://localhost:8000
 
-# Frontend
+# Frontend (in another terminal)
 cd frontend
 npm install
 npm run dev                    # http://localhost:3000
 ```
-
-### Stop Services (Windows)
-```bash
-# Double-click stop.bat
-# Or close terminal windows
-```
-
-**Admin:** http://localhost:8000/admin/ (credentials in environment or .env file)
 
 ---
 
@@ -349,9 +357,9 @@ GET /api/invoices/{id}/download_pdf/  # Download file (fetch + blob)
 - **PDF generator**: Fixed `RoundRect` import error in ReportLab
 
 ### New Features
+- **Docker support**: Single `docker-compose up` to run everything (no Python/Node install needed)
 - **Subscriptions frontend**: Full UI for managing AI tool subscriptions
 - **Usage tracking page**: `/subscriptions/usage` with filters
-- **Start scripts**: `start.bat` and `stop.bat` for Windows
 - **Quicksand fonts**: Copied to `backend/static/fonts/`
 - **PDF generator rewrite**: Pure ReportLab implementation matching Canva template exactly
 - **Invoice migration command**: `migrate_invoice_numbers` to convert old format to SB6-XX
