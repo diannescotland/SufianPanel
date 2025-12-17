@@ -2,54 +2,58 @@
 title Sufian Panel - Database Backup
 color 0B
 
+:: Change to script directory
+cd /d "%~dp0"
+
 echo.
-echo ╔════════════════════════════════════════════════════════════╗
-echo ║            SUFIAN PANEL - DATABASE BACKUP                  ║
-echo ╚════════════════════════════════════════════════════════════╝
+echo ========================================
+echo     SUFIAN PANEL - DATABASE BACKUP
+echo ========================================
 echo.
 
-REM Create backups folder if it doesn't exist
-if not exist "%~dp0backups" (
-    mkdir "%~dp0backups"
-)
+:: Create backups folder if it doesn't exist
+if not exist "backups" mkdir backups
 
-REM Generate timestamp
-for /f "tokens=1-3 delims=/ " %%a in ('date /t') do set DATE=%%c-%%b-%%a
-for /f "tokens=1-2 delims=: " %%a in ('time /t') do set TIME=%%a%%b
+:: Generate timestamp
+for /f "tokens=2 delims==" %%I in ('wmic os get localdatetime /format:list') do set datetime=%%I
+set BACKUP_NAME=db-backup-%datetime:~0,8%-%datetime:~8,4%.sqlite3
 
-REM Set backup filename
-set BACKUP_NAME=db-backup-%DATE%-%TIME%.sqlite3
-set SOURCE=%~dp0backend\db.sqlite3
-set DEST=%~dp0backups\%BACKUP_NAME%
-
-REM Check if database exists
-if not exist "%SOURCE%" (
+:: Check if Docker is running
+docker info >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
     color 0C
-    echo [ERROR] Database file not found!
-    echo Expected location: %SOURCE%
-    echo.
-    echo Please run the application at least once to create the database.
+    echo [ERREUR] Docker n'est pas demarre!
+    echo Veuillez ouvrir Docker Desktop.
     pause
     exit /b 1
 )
 
-REM Copy database
-echo Creating backup...
-copy "%SOURCE%" "%DEST%" >nul
+:: Check if container is running
+docker ps --filter "name=sufian-panel-backend" --format "{{.Names}}" | findstr "sufian-panel-backend" >nul
+if %ERRORLEVEL% NEQ 0 (
+    color 0C
+    echo [ERREUR] L'application n'est pas demarree!
+    echo Lancez start.bat d'abord.
+    pause
+    exit /b 1
+)
+
+:: Copy database from container
+echo Creation de la sauvegarde...
+docker cp sufian-panel-backend:/app/data/db.sqlite3 "backups\%BACKUP_NAME%"
 
 if %ERRORLEVEL% EQU 0 (
     color 0A
     echo.
-    echo ╔════════════════════════════════════════════════════════════╗
-    echo ║              BACKUP CREATED SUCCESSFULLY!                  ║
-    echo ╚════════════════════════════════════════════════════════════╝
+    echo ========================================
+    echo     SAUVEGARDE CREEE AVEC SUCCES!
+    echo ========================================
     echo.
-    echo Backup saved to:
-    echo %DEST%
+    echo Fichier: backups\%BACKUP_NAME%
     echo.
 ) else (
     color 0C
-    echo [ERROR] Failed to create backup!
+    echo [ERREUR] Echec de la sauvegarde!
 )
 
 pause
