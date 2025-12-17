@@ -2,6 +2,7 @@
 
 import { useState, memo } from 'react'
 import { useTheme } from '@/providers/theme-provider'
+import { authService } from '@/services/auth'
 import { cn } from '@/lib/utils'
 import {
   Search,
@@ -159,6 +160,7 @@ export const Header = memo(function Header({ sidebarCollapsed, onMenuClick }: He
                   </button>
                   <div className="border-t border-border/50 mt-1.5 pt-1.5">
                     <button
+                      onClick={() => authService.logout()}
                       className="w-full flex items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
                       role="menuitem"
                     >
