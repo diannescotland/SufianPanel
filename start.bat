@@ -53,10 +53,26 @@ echo    DEMARRAGE DE L'APPLICATION...
 echo ========================================
 echo.
 echo Cela peut prendre 3-5 minutes la premiere fois.
+echo Vous verrez le progres ci-dessous:
 echo.
 
-:: Start containers
-docker compose up --build
+:: Start containers with plain progress output
+docker compose build --progress=plain
+if %ERRORLEVEL% NEQ 0 (
+    color 0C
+    echo.
+    echo [ERREUR] Echec de la construction!
+    pause
+    exit /b 1
+)
+
+echo.
+echo [OK] Construction terminee!
+echo.
+echo Demarrage des services...
+echo.
+
+docker compose up
 
 echo.
 echo ========================================
