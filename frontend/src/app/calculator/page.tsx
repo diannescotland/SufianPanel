@@ -18,8 +18,12 @@ import {
   ChevronDown,
   Clock,
   Hash,
+  Users,
 } from 'lucide-react'
 import { ServicePricing } from '@/types'
+import { ClientCostSimulator } from '@/components/calculator/ClientCostSimulator'
+
+type TabType = 'pricing' | 'simulator'
 
 // Tier colors
 const tierColors = {
@@ -50,6 +54,7 @@ function generateId() {
 }
 
 export default function CalculatorPage() {
+  const [activeTab, setActiveTab] = useState<TabType>('simulator')
   const [items, setItems] = useState<CalculatorLineItem[]>([
     { id: generateId(), ai_tool: '', tier: 'free', quantity: 1, duration_seconds: 0 },
   ])
@@ -118,9 +123,46 @@ export default function CalculatorPage() {
             </div>
             Cost Calculator
           </h1>
-          <p className="text-muted-foreground mt-2">Estimate project costs based on AI services and quantity</p>
+          <p className="text-muted-foreground mt-2">
+            {activeTab === 'simulator'
+              ? 'Estimate how much one client will cost you in AI tools'
+              : 'Estimate project costs based on AI services and quantity'}
+          </p>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="flex gap-2 p-1 rounded-xl bg-secondary/30 border border-border/50 w-fit">
+          <button
+            onClick={() => setActiveTab('simulator')}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+              activeTab === 'simulator'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+            )}
+          >
+            <Users className="w-4 h-4" />
+            Client Cost Simulator
+          </button>
+          <button
+            onClick={() => setActiveTab('pricing')}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
+              activeTab === 'pricing'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+            )}
+          >
+            <Calculator className="w-4 h-4" />
+            Service Pricing
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'simulator' ? (
+          <ClientCostSimulator />
+        ) : (
+          <>
         {/* Calculator form */}
         <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5">
           <div className="flex items-center justify-between">
@@ -437,6 +479,8 @@ export default function CalculatorPage() {
               </table>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
     </DashboardLayout>
