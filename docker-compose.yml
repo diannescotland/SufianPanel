@@ -9,7 +9,7 @@ services:
       - ./backend/media:/app/media
     environment:
       - SECRET_KEY=k1uic_pp0(elssiewv3j-_xvk8nt1ch7f2!tze62qvxe*nwaoe
-      - DEBUG=False
+      - DEBUG=True
       - CORS_ALLOWED_ORIGINS=http://localhost:3000
       - DJANGO_SUPERUSER_USERNAME=sufianbh26
       - DJANGO_SUPERUSER_EMAIL=sufianbh26@example.com
