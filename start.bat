@@ -72,10 +72,47 @@ echo.
 echo Demarrage des services...
 echo.
 
-:: Open browser after a short delay
+:: Start backend first
+echo Demarrage du backend...
+docker compose up -d backend
+
+:: Wait for backend to be ready
+echo.
+echo Attente du backend (verification de sante)...
+:wait_backend
+timeout /t 2 /nobreak >nul
+curl -s http://localhost:8000/api/health/ >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo    En attente...
+    goto wait_backend
+)
+echo [OK] Backend pret!
+echo.
+
+:: Start frontend
+echo Demarrage du frontend...
+docker compose up -d frontend
+
+:: Wait a moment for frontend to initialize
+timeout /t 5 /nobreak >nul
+
+:: Open browser
+echo.
+echo Ouverture du navigateur...
 start "" http://localhost:3000
 
-docker compose up
+:: Show logs
+echo.
+echo ========================================
+echo    APPLICATION DEMARREE!
+echo ========================================
+echo.
+echo Backend:  http://localhost:8000
+echo Frontend: http://localhost:3000
+echo.
+echo Appuyez sur Ctrl+C pour arreter.
+echo.
+docker compose logs -f
 
 echo.
 echo ========================================
