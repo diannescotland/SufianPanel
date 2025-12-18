@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { useTheme } from '@/providers/theme-provider'
+import { useSettings } from '@/providers/settings-provider'
 import { cn } from '@/lib/utils'
 import {
   Settings,
@@ -28,28 +29,13 @@ const themeOptions: { value: Theme; label: string; icon: typeof Sun }[] = [
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
+  const { settings, updateSettings, saveSettings, isSaving } = useSettings()
   const [showSaved, setShowSaved] = useState(false)
-  const [saving, setSaving] = useState(false)
 
-  // Business info state
-  const [businessName, setBusinessName] = useState('Design Studio')
-  const [businessEmail, setBusinessEmail] = useState('hello@designstudio.com')
-  const [businessPhone, setBusinessPhone] = useState('+1 (555) 000-0000')
-  const [businessAddress, setBusinessAddress] = useState('')
-
-  // Notification state
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [deadlineReminders, setDeadlineReminders] = useState(true)
-  const [paymentAlerts, setPaymentAlerts] = useState(true)
-
-  const handleSave = () => {
-    setSaving(true)
-    // Simulate save
-    setTimeout(() => {
-      setSaving(false)
-      setShowSaved(true)
-      setTimeout(() => setShowSaved(false), 2000)
-    }, 500)
+  const handleSave = async () => {
+    await saveSettings()
+    setShowSaved(true)
+    setTimeout(() => setShowSaved(false), 2000)
   }
 
   return (
@@ -119,8 +105,8 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-foreground mb-2">Business Name</label>
               <input
                 type="text"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
+                value={settings.businessName}
+                onChange={(e) => updateSettings({ businessName: e.target.value })}
                 className={cn(
                   'w-full px-4 py-3 rounded-xl',
                   'bg-secondary/50 border border-border/50',
@@ -135,8 +121,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-foreground mb-2">Email</label>
                 <input
                   type="email"
-                  value={businessEmail}
-                  onChange={(e) => setBusinessEmail(e.target.value)}
+                  value={settings.businessEmail}
+                  onChange={(e) => updateSettings({ businessEmail: e.target.value })}
                   className={cn(
                     'w-full px-4 py-3 rounded-xl',
                     'bg-secondary/50 border border-border/50',
@@ -149,8 +135,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-foreground mb-2">Phone</label>
                 <input
                   type="tel"
-                  value={businessPhone}
-                  onChange={(e) => setBusinessPhone(e.target.value)}
+                  value={settings.businessPhone}
+                  onChange={(e) => updateSettings({ businessPhone: e.target.value })}
                   className={cn(
                     'w-full px-4 py-3 rounded-xl',
                     'bg-secondary/50 border border-border/50',
@@ -164,8 +150,8 @@ export default function SettingsPage() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Address</label>
               <textarea
-                value={businessAddress}
-                onChange={(e) => setBusinessAddress(e.target.value)}
+                value={settings.businessAddress}
+                onChange={(e) => updateSettings({ businessAddress: e.target.value })}
                 rows={2}
                 placeholder="Enter your business address"
                 className={cn(
@@ -193,16 +179,16 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">Receive updates via email</p>
               </div>
               <button
-                onClick={() => setEmailNotifications(!emailNotifications)}
+                onClick={() => updateSettings({ emailNotifications: !settings.emailNotifications })}
                 className={cn(
                   'relative w-11 h-6 rounded-full transition-colors',
-                  emailNotifications ? 'bg-primary' : 'bg-secondary'
+                  settings.emailNotifications ? 'bg-primary' : 'bg-secondary'
                 )}
               >
                 <span
                   className={cn(
                     'absolute top-1 w-4 h-4 rounded-full bg-white transition-transform',
-                    emailNotifications ? 'translate-x-6' : 'translate-x-1'
+                    settings.emailNotifications ? 'translate-x-6' : 'translate-x-1'
                   )}
                 />
               </button>
@@ -214,16 +200,16 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">Get notified about upcoming deadlines</p>
               </div>
               <button
-                onClick={() => setDeadlineReminders(!deadlineReminders)}
+                onClick={() => updateSettings({ deadlineReminders: !settings.deadlineReminders })}
                 className={cn(
                   'relative w-11 h-6 rounded-full transition-colors',
-                  deadlineReminders ? 'bg-primary' : 'bg-secondary'
+                  settings.deadlineReminders ? 'bg-primary' : 'bg-secondary'
                 )}
               >
                 <span
                   className={cn(
                     'absolute top-1 w-4 h-4 rounded-full bg-white transition-transform',
-                    deadlineReminders ? 'translate-x-6' : 'translate-x-1'
+                    settings.deadlineReminders ? 'translate-x-6' : 'translate-x-1'
                   )}
                 />
               </button>
@@ -235,16 +221,16 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">Notify when payments are received or overdue</p>
               </div>
               <button
-                onClick={() => setPaymentAlerts(!paymentAlerts)}
+                onClick={() => updateSettings({ paymentAlerts: !settings.paymentAlerts })}
                 className={cn(
                   'relative w-11 h-6 rounded-full transition-colors',
-                  paymentAlerts ? 'bg-primary' : 'bg-secondary'
+                  settings.paymentAlerts ? 'bg-primary' : 'bg-secondary'
                 )}
               >
                 <span
                   className={cn(
                     'absolute top-1 w-4 h-4 rounded-full bg-white transition-transform',
-                    paymentAlerts ? 'translate-x-6' : 'translate-x-1'
+                    settings.paymentAlerts ? 'translate-x-6' : 'translate-x-1'
                   )}
                 />
               </button>
@@ -256,7 +242,7 @@ export default function SettingsPage() {
         <div className="flex justify-end">
           <button
             onClick={handleSave}
-            disabled={saving}
+            disabled={isSaving}
             className={cn(
               'inline-flex items-center gap-2 px-6 py-2.5 rounded-xl',
               'bg-primary text-primary-foreground font-medium text-sm',
@@ -265,7 +251,7 @@ export default function SettingsPage() {
               'disabled:opacity-50 disabled:cursor-not-allowed'
             )}
           >
-            {saving ? (
+            {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Saving...

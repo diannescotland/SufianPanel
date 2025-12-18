@@ -106,7 +106,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny], authentication_classes=[])
     def pdf(self, request, pk=None):
         """Generate and view PDF invoice inline (public endpoint)."""
         import logging
@@ -128,7 +128,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=True, methods=['get'], permission_classes=[AllowAny])
+    @action(detail=True, methods=['get'], permission_classes=[AllowAny], authentication_classes=[])
     def download_pdf(self, request, pk=None):
         """Download PDF as attachment (public endpoint)."""
         import logging

@@ -123,12 +123,24 @@ export default function NewInvoicePage() {
   const clients = clientsData?.results || []
   const projects = projectsData?.results || []
 
-  // Reset project when client changes
+  // Reset project when client changes (only if not pre-selected)
   useEffect(() => {
-    if (!preselectedProjectId) {
+    // If user manually changes client (not the preselected one), reset project
+    if (selectedClientId !== preselectedClientId) {
       setValue('project', '')
     }
-  }, [selectedClientId, setValue, preselectedProjectId])
+  }, [selectedClientId, setValue, preselectedClientId])
+
+  // Apply pre-selected project after projects have loaded
+  useEffect(() => {
+    if (preselectedProjectId && projects.length > 0) {
+      // Check if the pre-selected project exists in the loaded projects
+      const projectExists = projects.some(p => p.id === preselectedProjectId)
+      if (projectExists) {
+        setValue('project', preselectedProjectId)
+      }
+    }
+  }, [preselectedProjectId, projects, setValue])
 
   const createMutation = useMutation({
     mutationFn: (data: InvoiceFormData) => {

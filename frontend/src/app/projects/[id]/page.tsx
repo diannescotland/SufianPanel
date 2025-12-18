@@ -114,10 +114,14 @@ function ProjectHeader({
   project,
   onStatusChange,
   isUpdating,
+  onDelete,
+  isDeleting,
 }: {
   project: Project
   onStatusChange: (status: ProjectStatus) => void
   isUpdating: boolean
+  onDelete: () => void
+  isDeleting: boolean
 }) {
   const ServiceIcon = serviceTypeIcons[project.service_type] || Layers
 
@@ -177,6 +181,19 @@ function ProjectHeader({
             <Edit className="w-4 h-4" />
             Edit
           </Link>
+          <button
+            onClick={onDelete}
+            disabled={isDeleting}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl',
+              'bg-destructive/10 border border-destructive/30 text-destructive font-medium text-sm',
+              'hover:bg-destructive/20 hover:border-destructive/50 transition-colors',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </button>
           <Link
             href={`/invoices/new?project=${project.id}&client=${project.client}`}
             className={cn(
@@ -451,6 +468,7 @@ export default function ProjectDetailPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const projectId = params.id as string
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const { data: project, isLoading, isError } = useQuery({
     queryKey: ['project', projectId],
@@ -464,6 +482,14 @@ export default function ProjectDetailPage() {
     onSuccess: (updatedProject) => {
       queryClient.setQueryData(['project', projectId], updatedProject)
       queryClient.invalidateQueries({ queryKey: ['projects'] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => projectsService.delete(projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      router.push('/projects')
     },
   })
 
@@ -490,6 +516,8 @@ export default function ProjectDetailPage() {
               project={project}
               onStatusChange={(status) => statusMutation.mutate(status)}
               isUpdating={statusMutation.isPending}
+              onDelete={() => setShowDeleteModal(true)}
+              isDeleting={deleteMutation.isPending}
             />
 
             {/* Info cards row */}
@@ -511,6 +539,61 @@ export default function ProjectDetailPage() {
                 <> &middot; Last updated {formatDate(project.updated_at)}</>
               )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div
+                  className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                  onClick={() => setShowDeleteModal(false)}
+                />
+                <div className="relative bg-card rounded-2xl border border-border shadow-xl w-full max-w-md mx-4 p-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                      <AlertCircle className="w-6 h-6 text-destructive" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-foreground">Delete Project</h2>
+                      <p className="text-sm text-muted-foreground">This action cannot be undone</p>
+                    </div>
+                  </div>
+
+                  <p className="text-foreground mb-6">
+                    Are you sure you want to delete <span className="font-semibold">{project.title}</span>?
+                    This will permanently remove the project and all associated data.
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      className={cn(
+                        'flex-1 px-4 py-2.5 rounded-xl',
+                        'bg-secondary/50 border border-border/50 text-foreground font-medium',
+                        'hover:bg-secondary transition-colors'
+                      )}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => deleteMutation.mutate()}
+                      disabled={deleteMutation.isPending}
+                      className={cn(
+                        'flex-1 px-4 py-2.5 rounded-xl',
+                        'bg-destructive text-destructive-foreground font-medium',
+                        'hover:bg-destructive/90 transition-colors',
+                        'disabled:opacity-50 disabled:cursor-not-allowed'
+                      )}
+                    >
+                      {deleteMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                      ) : (
+                        'Delete'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

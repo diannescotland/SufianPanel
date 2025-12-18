@@ -4,6 +4,7 @@ import { memo } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { useSettings } from '@/providers/settings-provider'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
@@ -39,6 +40,7 @@ interface SidebarProps {
 
 export const Sidebar = memo(function Sidebar({ mobileOpen, onMobileClose, collapsed = false, onCollapse }: SidebarProps) {
   const pathname = usePathname()
+  const { settings } = useSettings()
 
   return (
     <aside
@@ -79,7 +81,7 @@ export const Sidebar = memo(function Sidebar({ mobileOpen, onMobileClose, collap
             {!collapsed && (
               <div className="overflow-hidden">
                 <h1 className="font-semibold text-lg tracking-tight text-sidebar-foreground group-hover:text-sidebar-foreground transition-colors">
-                  Sufian Bouhrara
+                  {settings.businessName}
                 </h1>
               </div>
             )}
