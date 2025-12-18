@@ -231,7 +231,7 @@ export function ClientCostSimulator() {
   return (
     <div className="space-y-6">
       {/* Monthly Allocations Section */}
-      <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5">
+      <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-amber-500/10">
             <Wallet className="w-5 h-5 text-amber-500" />
@@ -245,7 +245,7 @@ export function ClientCostSimulator() {
         </div>
 
         {/* Expected clients input */}
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-secondary/30 border border-border/50">
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-[#17181C] border border-border/50">
           <Users className="w-5 h-5 text-muted-foreground" />
           <label className="text-sm font-medium text-foreground">
             Expected clients this month:
@@ -257,7 +257,7 @@ export function ClientCostSimulator() {
             onChange={(e) => setExpectedClients(parseInt(e.target.value) || 1)}
             className={cn(
               'w-20 px-3 py-2 rounded-lg text-center',
-              'bg-secondary/50 border border-border/50',
+              'bg-[#17181C] border border-border/50',
               'text-foreground text-sm font-medium',
               'focus:outline-none focus:ring-2 focus:ring-primary/20'
             )}
@@ -275,7 +275,7 @@ export function ClientCostSimulator() {
             return (
               <div
                 key={tool.id}
-                className="p-4 rounded-xl bg-secondary/30 border border-border/50 space-y-3"
+                className="p-4 rounded-xl bg-[#17181C] border border-border/50 space-y-3"
               >
                 <label className="text-sm font-medium text-foreground">
                   {tool.name}
@@ -290,7 +290,7 @@ export function ClientCostSimulator() {
                     }
                     className={cn(
                       'flex-1 px-3 py-2 rounded-lg',
-                      'bg-secondary/50 border border-border/50',
+                      'bg-[#17181C] border border-border/50',
                       'text-foreground text-sm',
                       'focus:outline-none focus:ring-2 focus:ring-primary/20'
                     )}
@@ -307,7 +307,7 @@ export function ClientCostSimulator() {
       </div>
 
       {/* Image Generation Section */}
-      <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5">
+      <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-500/10">
@@ -344,7 +344,7 @@ export function ClientCostSimulator() {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border/50"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#17181C] border border-border/50"
                 >
                   {/* Tool select */}
                   <div className="relative flex-1">
@@ -358,7 +358,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -385,7 +385,7 @@ export function ClientCostSimulator() {
                         }
                         className={cn(
                           'w-full px-3 py-2 rounded-lg appearance-none',
-                          'bg-secondary/50 border border-border/50',
+                          'bg-[#17181C] border border-border/50',
                           'text-foreground text-sm',
                           'focus:outline-none focus:ring-2 focus:ring-primary/20',
                           'cursor-pointer'
@@ -414,7 +414,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg text-center',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20'
                       )}
@@ -444,7 +444,7 @@ export function ClientCostSimulator() {
       </div>
 
       {/* Video Generation Section */}
-      <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5">
+      <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-purple-500/10">
@@ -481,7 +481,7 @@ export function ClientCostSimulator() {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border/50"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#17181C] border border-border/50"
                 >
                   {/* Tool select */}
                   <div className="relative flex-1">
@@ -495,7 +495,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -521,7 +521,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -549,7 +549,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg text-center',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20'
                       )}
@@ -579,7 +579,7 @@ export function ClientCostSimulator() {
       </div>
 
       {/* Music Generation Section */}
-      <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5">
+      <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-green-500/10">
@@ -616,7 +616,7 @@ export function ClientCostSimulator() {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-secondary/30 border border-border/50"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#17181C] border border-border/50"
                 >
                   {/* Tool select */}
                   <div className="relative flex-1">
@@ -630,7 +630,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -656,7 +656,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -684,7 +684,7 @@ export function ClientCostSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg text-center',
-                        'bg-secondary/50 border border-border/50',
+                        'bg-[#17181C] border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20'
                       )}
@@ -714,7 +714,7 @@ export function ClientCostSimulator() {
       </div>
 
       {/* Cost Breakdown Section */}
-      <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 overflow-hidden">
+      <div className="rounded-2xl bg-[#17181C] border border-border/50 overflow-hidden">
         <div className="p-5 border-b border-border/50 flex items-center gap-3">
           <Calculator className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-foreground">Cost Breakdown</h3>

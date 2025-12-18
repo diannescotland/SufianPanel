@@ -131,14 +131,14 @@ export default function CalculatorPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 p-1 rounded-xl bg-secondary/30 border border-border/50 w-fit">
+        <div className="flex gap-2 p-1 rounded-xl bg-[#17181C] border border-border/50 w-fit">
           <button
             onClick={() => setActiveTab('simulator')}
             className={cn(
               'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               activeTab === 'simulator'
                 ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                : 'text-muted-foreground hover:text-foreground hover:bg-[#17181C]'
             )}
           >
             <Users className="w-4 h-4" />
@@ -150,7 +150,7 @@ export default function CalculatorPage() {
               'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               activeTab === 'pricing'
                 ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                : 'text-muted-foreground hover:text-foreground hover:bg-[#17181C]'
             )}
           >
             <Calculator className="w-4 h-4" />
@@ -164,7 +164,7 @@ export default function CalculatorPage() {
         ) : (
           <>
         {/* Calculator form */}
-        <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-6 space-y-5">
+        <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-foreground">Services</h3>
             <button
@@ -195,7 +195,7 @@ export default function CalculatorPage() {
                 return (
                   <div
                     key={item.id}
-                    className="p-4 rounded-xl bg-secondary/30 border border-border/50 space-y-4"
+                    className="p-4 rounded-xl bg-[#17181C] border border-border/50 space-y-4"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-muted-foreground">
@@ -224,7 +224,7 @@ export default function CalculatorPage() {
                             onChange={(e) => updateItem(item.id, { ai_tool: e.target.value })}
                             className={cn(
                               'w-full pl-10 pr-10 py-2.5 rounded-xl appearance-none',
-                              'bg-secondary/50 border border-border/50',
+                              'bg-[#17181C] border border-border/50',
                               'text-foreground text-sm',
                               'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                               'cursor-pointer'
@@ -256,7 +256,7 @@ export default function CalculatorPage() {
                                 'flex-1 py-2 rounded-lg text-xs font-medium capitalize transition-all border',
                                 item.tier === tier
                                   ? tierColors[tier]
-                                  : 'bg-secondary/30 border-transparent text-muted-foreground hover:bg-secondary/50'
+                                  : 'bg-[#17181C] border-transparent text-muted-foreground hover:bg-[#17181C]'
                               )}
                             >
                               {tier}
@@ -283,7 +283,7 @@ export default function CalculatorPage() {
                                 }
                                 className={cn(
                                   'w-full pl-10 pr-4 py-2.5 rounded-xl',
-                                  'bg-secondary/50 border border-border/50',
+                                  'bg-[#17181C] border border-border/50',
                                   'text-foreground text-sm',
                                   'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50'
                                 )}
@@ -308,7 +308,7 @@ export default function CalculatorPage() {
                                 }
                                 className={cn(
                                   'w-full pl-10 pr-4 py-2.5 rounded-xl',
-                                  'bg-secondary/50 border border-border/50',
+                                  'bg-[#17181C] border border-border/50',
                                   'text-foreground text-sm',
                                   'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50'
                                 )}
@@ -372,7 +372,7 @@ export default function CalculatorPage() {
 
         {/* Results */}
         {result && (
-          <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 overflow-hidden">
+          <div className="rounded-2xl bg-[#17181C] border border-border/50 overflow-hidden">
             <div className="p-5 border-b border-border/50">
               <h3 className="font-semibold text-foreground">Cost Breakdown</h3>
             </div>
@@ -412,7 +412,7 @@ export default function CalculatorPage() {
 
         {/* Pricing reference */}
         {pricingOptions && pricingOptions.length > 0 && (
-          <div className="rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 p-5">
+          <div className="rounded-2xl bg-[#17181C] border border-border/50 p-5">
             <h3 className="font-semibold text-foreground mb-4">Pricing Reference</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

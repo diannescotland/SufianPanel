@@ -101,27 +101,29 @@ class Invoice(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        # Generate invoice number if not set (format: SB{month}-{N}, starting at 9)
+        # Generate invoice number if not set (format: SB{N}-{month}, starting at 9)
         if not self.invoice_number:
             from datetime import datetime
             current_month = datetime.now().month
-            prefix = f'SB{current_month}-'
-            prefix_len = len(prefix)
+            suffix = f'-{current_month}'
+            suffix_len = len(suffix)
 
             with transaction.atomic():
                 # Use Max() aggregation for O(1) lookup instead of O(n) iteration
-                # Extract the numeric part after the prefix and find the maximum
+                # Extract the numeric part between "SB" and "-{month}"
                 result = Invoice.objects.select_for_update().filter(
-                    invoice_number__startswith=prefix
+                    invoice_number__endswith=suffix,
+                    invoice_number__startswith='SB'
                 ).annotate(
-                    # Extract the number after "SB{month}-"
-                    num_str=Substr('invoice_number', prefix_len + 1)
+                    # Extract the number between "SB" and "-{month}"
+                    # Length of "SB" is 2, so start at position 3
+                    num_str=Substr('invoice_number', 3, Length('invoice_number') - 2 - suffix_len)
                 ).aggregate(
                     max_num=Max(Cast('num_str', models.IntegerField()))
                 )
 
                 max_num = result['max_num'] if result['max_num'] is not None else INVOICE_START_NUMBER
-                self.invoice_number = f'{prefix}{max_num + 1}'
+                self.invoice_number = f'SB{max_num + 1}{suffix}'
 
         super().save(*args, **kwargs)
 
