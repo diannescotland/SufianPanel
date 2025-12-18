@@ -48,8 +48,8 @@ python manage.py seed_tools 2>/dev/null || true\n\
 # Fix existing clients to be active\n\
 python manage.py fix_active_clients 2>/dev/null || true\n\
 \n\
-# Start server\n\
-exec python manage.py runserver 0.0.0.0:8000' > /entrypoint.sh \
+# Start production server with Gunicorn\n\
+exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4' > /entrypoint.sh \
     && chmod +x /entrypoint.sh
 
 # Run the application

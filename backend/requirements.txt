@@ -7,4 +7,5 @@ python-dotenv>=1.0
 pillow>=10.0
 reportlab>=4.0
 pypdf>=4.0
+gunicorn>=21.0
 # weasyprint removed - using ReportLab for PDF generation (no GTK dependency)
