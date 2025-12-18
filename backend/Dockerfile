@@ -40,13 +40,14 @@ export DATABASE_PATH=/app/data/db.sqlite3\n\
 python manage.py migrate --run-syncdb\n\
 \n\
 # Seed admin user\n\
-python manage.py seed_admin 2>/dev/null || true\n\
+python manage.py seed_admin || echo "seed_admin skipped"\n\
 \n\
-# Seed tools\n\
-python manage.py seed_tools 2>/dev/null || true\n\
+# Seed AI tools\n\
+echo "Seeding AI tools..."\n\
+python manage.py seed_tools || echo "seed_tools failed"\n\
 \n\
 # Fix existing clients to be active\n\
-python manage.py fix_active_clients 2>/dev/null || true\n\
+python manage.py fix_active_clients || echo "fix_active_clients skipped"\n\
 \n\
 # Start production server with Gunicorn\n\
 exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4' > /entrypoint.sh \
