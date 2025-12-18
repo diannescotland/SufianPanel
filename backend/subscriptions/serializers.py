@@ -40,9 +40,13 @@ class AIToolSerializer(serializers.ModelSerializer):
             'id', 'name', 'display_name', 'tool_type', 'pricing_model',
             'default_monthly_cost_mad', 'default_credits_per_month',
             'default_cost_per_image_mad', 'default_cost_per_video_second_mad',
-            'is_active', 'notes', 'created_at', 'updated_at'
+            'free_monthly_cost_mad', 'free_credits_per_month', 'free_features',
+            'standard_monthly_cost_mad', 'standard_credits_per_month', 'standard_features',
+            'pro_monthly_cost_mad', 'pro_credits_per_month', 'pro_features',
+            'premier_monthly_cost_mad', 'premier_credits_per_month', 'premier_features',
+            'icon', 'is_active'
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['id']
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
