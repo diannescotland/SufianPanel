@@ -48,6 +48,13 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 echo [OK] Docker est pret
 echo.
+
+:: Clean up Docker cache to prevent layer corruption
+echo Nettoyage du cache Docker...
+docker system prune -f >nul 2>&1
+echo [OK] Cache nettoye
+echo.
+
 echo ========================================
 echo    DEMARRAGE DE L'APPLICATION...
 echo ========================================
