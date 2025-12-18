@@ -18,7 +18,7 @@ export default function CalculatorPage() {
         {/* Page header */}
         <div>
           <h1 className="text-2xl font-semibold text-foreground tracking-tight flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-purple-500 shadow-lg shadow-primary/25">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25">
               <Calculator className="w-5 h-5 text-white" />
             </div>
             Cost Calculator
@@ -31,14 +31,14 @@ export default function CalculatorPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-2 p-1 rounded-xl bg-[#17181C] border border-border/50 w-fit">
+        <div className="flex gap-2 p-1 rounded-xl bg-card border border-border/50 w-fit">
           <button
             onClick={() => setActiveTab('simulator')}
             className={cn(
               'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               activeTab === 'simulator'
                 ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-[#17181C]'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <Users className="w-4 h-4" />
@@ -50,7 +50,7 @@ export default function CalculatorPage() {
               'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all',
               activeTab === 'pricing'
                 ? 'bg-primary text-primary-foreground shadow-md'
-                : 'text-muted-foreground hover:text-foreground hover:bg-[#17181C]'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <Calculator className="w-4 h-4" />

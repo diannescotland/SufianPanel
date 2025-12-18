@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useDeferredValue } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { useQuery } from '@tanstack/react-query'
 import { projectsService } from '@/services/projects'
@@ -42,10 +42,13 @@ export default function ProjectsPage() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
+  // Debounce search input using React 18's useDeferredValue for better performance
+  const deferredSearch = useDeferredValue(search)
+
   const { data: projectsData, isLoading } = useQuery({
-    queryKey: ['projects', { search, status: statusFilter === 'all' ? undefined : statusFilter }],
+    queryKey: ['projects', { search: deferredSearch, status: statusFilter === 'all' ? undefined : statusFilter }],
     queryFn: () => projectsService.getAll({
-      search: search || undefined,
+      search: deferredSearch || undefined,
       status: statusFilter === 'all' ? undefined : statusFilter,
     }),
   })

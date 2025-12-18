@@ -1,6 +1,21 @@
 import api from './api'
 import { Invoice, Payment, InvoiceItem, PaginatedResponse, PaymentStatus } from '@/types'
 
+// Type for creating invoices (matches backend InvoiceCreateSerializer)
+export interface InvoiceCreatePayload {
+  client: string
+  project: string
+  due_date: string
+  notes?: string
+  total_amount: number
+  items: Array<{
+    title: string
+    description?: string
+    quantity: number
+    unit_price: number
+  }>
+}
+
 export const invoicesService = {
   getAll: async (params?: {
     client?: string
@@ -23,7 +38,7 @@ export const invoicesService = {
     return response.data
   },
 
-  create: async (data: Partial<Invoice> & { items?: Partial<InvoiceItem>[] }) => {
+  create: async (data: InvoiceCreatePayload) => {
     const response = await api.post<Invoice>('/invoices/', data)
     return response.data
   },

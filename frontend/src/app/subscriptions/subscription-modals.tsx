@@ -35,10 +35,10 @@ interface Client {
 
 interface Subscription {
   id: string
-  tool_name: string
+  tool_name?: string
   total_cost_mad: number
-  total_credits: number | null
-  notes: string | null
+  total_credits?: number | null
+  notes?: string | null
 }
 
 type GenerationType = 'image' | 'video' | 'audio' | 'other'
@@ -535,7 +535,7 @@ export function EditSubscriptionModal({
   const [error, setError] = useState<string | null>(null)
 
   const updateMutation = useMutation({
-    mutationFn: (data: Partial<Subscription>) =>
+    mutationFn: (data: { total_cost_mad?: number; total_credits?: number | null; notes?: string }) =>
       subscriptionsService.update(subscription.id, data),
     onSuccess,
     onError: (err: AxiosError<ApiErrorResponse>) => {
@@ -600,7 +600,7 @@ export function EditSubscriptionModal({
               AI Tool
             </label>
             <div className="px-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground">
-              {subscription.tool_name}
+              {subscription.tool_name || 'Unknown Tool'}
             </div>
           </div>
 
@@ -751,7 +751,7 @@ export function DeleteSubscriptionModal({
 
         <p id="delete-subscription-description" className="text-foreground mb-6">
           Are you sure you want to delete the subscription for{' '}
-          <span className="font-semibold">{subscription.tool_name}</span>?
+          <span className="font-semibold">{subscription.tool_name || 'Unknown Tool'}</span>?
           This will also remove all associated usage records.
         </p>
 

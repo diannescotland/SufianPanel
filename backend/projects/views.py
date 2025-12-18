@@ -20,6 +20,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
     ordering_fields = ['deadline', 'created_at', 'title']
     ordering = ['-created_at']
 
+    def get_queryset(self):
+        """Optimize queryset with select_related to avoid N+1 queries."""
+        queryset = super().get_queryset()
+        # Always select_related client to avoid N+1 for client_name
+        if self.action in ['list', 'retrieve', 'deadlines', 'calendar']:
+            queryset = queryset.select_related('client')
+        return queryset
+
     def get_serializer_class(self):
         if self.action == 'list':
             return ProjectListSerializer

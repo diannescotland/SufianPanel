@@ -22,6 +22,17 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     ordering_fields = ['due_date', 'issued_date', 'total_amount']
     ordering = ['-issued_date']
 
+    def get_queryset(self):
+        """Optimize queryset with select_related and prefetch_related."""
+        queryset = super().get_queryset()
+        if self.action == 'list':
+            # For list view, only select_related for FK fields
+            queryset = queryset.select_related('client', 'project')
+        elif self.action == 'retrieve':
+            # For detail view, also prefetch related items and payments
+            queryset = queryset.select_related('client', 'project').prefetch_related('items', 'payments')
+        return queryset
+
     def get_serializer_class(self):
         if self.action == 'list':
             return InvoiceListSerializer

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useDeferredValue } from 'react'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { useQuery } from '@tanstack/react-query'
 import { clientsService } from '@/services/clients'
@@ -25,9 +25,12 @@ export default function ClientsPage() {
   const [search, setSearch] = useState('')
   const [showActiveOnly, setShowActiveOnly] = useState(true)
 
+  // Debounce search input using React 18's useDeferredValue for better performance
+  const deferredSearch = useDeferredValue(search)
+
   const { data: clientsData, isLoading } = useQuery({
-    queryKey: ['clients', { search, is_active: showActiveOnly ? true : undefined }],
-    queryFn: () => clientsService.getAll({ search: search || undefined, is_active: showActiveOnly ? true : undefined }),
+    queryKey: ['clients', { search: deferredSearch, is_active: showActiveOnly ? true : undefined }],
+    queryFn: () => clientsService.getAll({ search: deferredSearch || undefined, is_active: showActiveOnly ? true : undefined }),
   })
 
   const clients = clientsData?.results || []

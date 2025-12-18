@@ -30,7 +30,7 @@ import {
   EditSubscriptionModal,
   DeleteSubscriptionModal,
 } from './subscription-modals'
-import { GenerationType, Subscription } from '@/types'
+import { Subscription } from '@/types'
 
 const toolTypeIcons = {
   image: Image,

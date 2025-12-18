@@ -172,6 +172,11 @@ class Payment(models.Model):
 
     class Meta:
         ordering = ['-payment_date']
+        indexes = [
+            models.Index(fields=['payment_date']),  # For date range queries in analytics
+            models.Index(fields=['invoice', 'payment_date']),  # For invoice payment history
+            models.Index(fields=['payment_method']),  # For payment method analytics
+        ]
 
     def __str__(self):
         return f"Paiement de {self.amount} MAD pour {self.invoice.invoice_number}"

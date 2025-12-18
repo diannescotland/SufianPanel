@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { invoicesService } from '@/services/invoices'
+import { invoicesService, InvoiceCreatePayload } from '@/services/invoices'
 import { clientsService } from '@/services/clients'
 import { projectsService } from '@/services/projects'
 import { useForm, useFieldArray } from 'react-hook-form'
@@ -43,21 +43,6 @@ const invoiceSchema = z.object({
 })
 
 type InvoiceFormData = z.infer<typeof invoiceSchema>
-
-// Type for the create API - matches backend InvoiceCreateSerializer
-interface InvoiceCreatePayload {
-  client: string
-  project: string
-  due_date: string
-  notes?: string
-  total_amount: number
-  items: Array<{
-    title: string
-    description?: string
-    quantity: number
-    unit_price: number
-  }>
-}
 
 export default function NewInvoicePage() {
   const router = useRouter()

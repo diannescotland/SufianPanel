@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { DashboardLayout } from '@/components/layout/DashboardLayout'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { clientsService } from '@/services/clients'
 import { formatCurrency, formatDate, getInitials, getStatusColor, cn } from '@/lib/utils'
 import { Client, ClientHistoryProject, ClientHistoryInvoice, ClientHistorySummary } from '@/types'
@@ -21,6 +21,8 @@ import {
   DollarSign,
   CreditCard,
   AlertCircle,
+  Trash2,
+  Loader2,
 } from 'lucide-react'
 
 // Loading skeleton component
@@ -91,7 +93,17 @@ function ErrorState({ message }: { message: string }) {
 }
 
 // Client header component
-function ClientHeader({ client, isActive }: { client: Client; isActive: boolean }) {
+function ClientHeader({
+  client,
+  isActive,
+  onDelete,
+  isDeleting,
+}: {
+  client: Client
+  isActive: boolean
+  onDelete: () => void
+  isDeleting: boolean
+}) {
   return (
     <div className={cn(
       'rounded-2xl bg-card/50 backdrop-blur-sm',
@@ -165,6 +177,19 @@ function ClientHeader({ client, isActive }: { client: Client; isActive: boolean 
             <Edit className="w-4 h-4" />
             Edit Client
           </Link>
+          <button
+            onClick={onDelete}
+            disabled={isDeleting}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl',
+              'bg-destructive/10 border border-destructive/30 text-destructive font-medium text-sm',
+              'hover:bg-destructive/20 hover:border-destructive/50 transition-colors',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
+          </button>
           <Link
             href={`/projects/new?client=${client.id}`}
             className={cn(
@@ -464,14 +489,25 @@ function InvoicesList({ invoices }: { invoices: ClientHistoryInvoice[] }) {
 // Main page component
 export default function ClientDetailPage() {
   const params = useParams()
+  const router = useRouter()
+  const queryClient = useQueryClient()
   const clientId = params.id as string
   const [activeTab, setActiveTab] = useState<'projects' | 'invoices'>('projects')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['client', clientId, 'history'],
     queryFn: () => clientsService.getHistory(clientId),
     enabled: !!clientId,
     retry: 1,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => clientsService.delete(clientId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] })
+      router.push('/clients')
+    },
   })
 
   return (
@@ -493,7 +529,12 @@ export default function ClientDetailPage() {
         ) : (
           <>
             {/* Client Header */}
-            <ClientHeader client={data.client} isActive={data.client.is_active} />
+            <ClientHeader
+              client={data.client}
+              isActive={data.client.is_active}
+              onDelete={() => setShowDeleteModal(true)}
+              isDeleting={deleteMutation.isPending}
+            />
 
             {/* Financial Summary */}
             <FinancialSummaryCards summary={data.summary} />
@@ -523,6 +564,61 @@ export default function ClientDetailPage() {
                 <> &middot; Last updated {formatDate(data.client.updated_at)}</>
               )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div
+                  className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                  onClick={() => setShowDeleteModal(false)}
+                />
+                <div className="relative bg-card rounded-2xl border border-border shadow-xl w-full max-w-md mx-4 p-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                      <AlertCircle className="w-6 h-6 text-destructive" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-foreground">Delete Client</h2>
+                      <p className="text-sm text-muted-foreground">This action cannot be undone</p>
+                    </div>
+                  </div>
+
+                  <p className="text-foreground mb-6">
+                    Are you sure you want to delete <span className="font-semibold">{data.client.name}</span>?
+                    This will deactivate the client and hide them from lists.
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowDeleteModal(false)}
+                      className={cn(
+                        'flex-1 px-4 py-2.5 rounded-xl',
+                        'bg-secondary/50 border border-border/50 text-foreground font-medium',
+                        'hover:bg-secondary transition-colors'
+                      )}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => deleteMutation.mutate()}
+                      disabled={deleteMutation.isPending}
+                      className={cn(
+                        'flex-1 px-4 py-2.5 rounded-xl',
+                        'bg-destructive text-destructive-foreground font-medium',
+                        'hover:bg-destructive/90 transition-colors',
+                        'disabled:opacity-50 disabled:cursor-not-allowed'
+                      )}
+                    >
+                      {deleteMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                      ) : (
+                        'Delete'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>

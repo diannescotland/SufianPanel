@@ -191,7 +191,7 @@ export function ServicePricingSimulator() {
   return (
     <div className="space-y-6">
       {/* Image Generation Section */}
-      <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
+      <div className="rounded-2xl bg-card border border-border/50 p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-500/10">
@@ -228,7 +228,7 @@ export function ServicePricingSimulator() {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[#17181C] border border-border/50"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border/50"
                 >
                   {/* Tool select */}
                   <div className="relative flex-1">
@@ -242,7 +242,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -269,7 +269,7 @@ export function ServicePricingSimulator() {
                         }
                         className={cn(
                           'w-full px-3 py-2 rounded-lg appearance-none',
-                          'bg-[#17181C] border border-border/50',
+                          'bg-input border border-border/50',
                           'text-foreground text-sm',
                           'focus:outline-none focus:ring-2 focus:ring-primary/20',
                           'cursor-pointer'
@@ -298,7 +298,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg text-center',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20'
                       )}
@@ -328,7 +328,7 @@ export function ServicePricingSimulator() {
       </div>
 
       {/* Video Generation Section */}
-      <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
+      <div className="rounded-2xl bg-card border border-border/50 p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-purple-500/10">
@@ -365,7 +365,7 @@ export function ServicePricingSimulator() {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[#17181C] border border-border/50"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border/50"
                 >
                   {/* Tool select */}
                   <div className="relative flex-1">
@@ -379,7 +379,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -405,7 +405,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -433,7 +433,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg text-center',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20'
                       )}
@@ -463,7 +463,7 @@ export function ServicePricingSimulator() {
       </div>
 
       {/* Music Generation Section */}
-      <div className="rounded-2xl bg-[#17181C] border border-border/50 p-6 space-y-5">
+      <div className="rounded-2xl bg-card border border-border/50 p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-green-500/10">
@@ -500,7 +500,7 @@ export function ServicePricingSimulator() {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[#17181C] border border-border/50"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted border border-border/50"
                 >
                   {/* Tool select */}
                   <div className="relative flex-1">
@@ -514,7 +514,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -540,7 +540,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg appearance-none',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20',
                         'cursor-pointer'
@@ -568,7 +568,7 @@ export function ServicePricingSimulator() {
                       }
                       className={cn(
                         'w-full px-3 py-2 rounded-lg text-center',
-                        'bg-[#17181C] border border-border/50',
+                        'bg-input border border-border/50',
                         'text-foreground text-sm',
                         'focus:outline-none focus:ring-2 focus:ring-primary/20'
                       )}
@@ -598,7 +598,7 @@ export function ServicePricingSimulator() {
       </div>
 
       {/* Cost Breakdown Section */}
-      <div className="rounded-2xl bg-[#17181C] border border-border/50 overflow-hidden">
+      <div className="rounded-2xl bg-card border border-border/50 overflow-hidden">
         <div className="p-5 border-b border-border/50 flex items-center gap-3">
           <Calculator className="w-5 h-5 text-primary" />
           <h3 className="font-semibold text-foreground">Cost Breakdown</h3>

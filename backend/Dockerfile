@@ -49,8 +49,21 @@ python manage.py seed_tools || echo "seed_tools failed"\n\
 # Fix existing clients to be active\n\
 python manage.py fix_active_clients || echo "fix_active_clients skipped"\n\
 \n\
-# Start production server with Gunicorn\n\
-exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4' > /entrypoint.sh \
+# Start production server with optimized Gunicorn settings\n\
+# Workers: 4 (2x CPU cores recommended)\n\
+# Threads: 4 per worker for I/O bound tasks\n\
+# Worker class: gthread for better concurrency\n\
+exec gunicorn config.wsgi:application \\\n\
+  --bind 0.0.0.0:8000 \\\n\
+  --workers 4 \\\n\
+  --threads 4 \\\n\
+  --worker-class gthread \\\n\
+  --timeout 120 \\\n\
+  --keep-alive 5 \\\n\
+  --max-requests 1000 \\\n\
+  --max-requests-jitter 50 \\\n\
+  --access-logfile - \\\n\
+  --error-logfile -' > /entrypoint.sh \
     && chmod +x /entrypoint.sh
 
 # Run the application

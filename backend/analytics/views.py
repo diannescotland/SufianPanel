@@ -1,8 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
-from django.db.models import Sum, Count, Avg, F
-from django.db.models.functions import TruncMonth, TruncWeek, TruncDay
+from django.db.models import Sum, Count, Avg, F, Q, Value
+from django.db.models.functions import TruncMonth, TruncWeek, TruncDay, Coalesce
+from django.core.cache import cache
+from django.conf import settings
 from datetime import timedelta
 from decimal import Decimal
 
@@ -13,29 +15,42 @@ from services.models import ServicePricing
 
 # Constants
 DEFAULT_MONTHS_LOOKBACK = 12  # Default number of months for analytics queries
+CACHE_TIMEOUT = getattr(settings, 'CACHE_TIMEOUT_ANALYTICS', 300)  # 5 minutes default
 
 
 class OverviewView(APIView):
-    """Dashboard overview statistics."""
+    """Dashboard overview statistics - optimized with consolidated queries and caching."""
 
     def get(self, request):
+        # Try to get cached response first
+        cache_key = f'analytics_overview_{timezone.now().date()}'
+        cached_response = cache.get(cache_key)
+        if cached_response is not None:
+            return Response(cached_response)
+
         today = timezone.now().date()
         this_month_start = today.replace(day=1)
         last_month_start = (this_month_start - timedelta(days=1)).replace(day=1)
 
-        # Total revenue
-        total_revenue = Payment.objects.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        # OPTIMIZED: Single aggregated query for all payment metrics (was 3 queries)
+        payment_stats = Payment.objects.aggregate(
+            total_revenue=Coalesce(Sum('amount'), Value(Decimal('0'))),
+            this_month_revenue=Coalesce(
+                Sum('amount', filter=Q(payment_date__gte=this_month_start)),
+                Value(Decimal('0'))
+            ),
+            last_month_revenue=Coalesce(
+                Sum('amount', filter=Q(
+                    payment_date__gte=last_month_start,
+                    payment_date__lt=this_month_start
+                )),
+                Value(Decimal('0'))
+            ),
+        )
 
-        # This month's revenue
-        this_month_revenue = Payment.objects.filter(
-            payment_date__gte=this_month_start
-        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
-
-        # Last month's revenue for comparison
-        last_month_revenue = Payment.objects.filter(
-            payment_date__gte=last_month_start,
-            payment_date__lt=this_month_start
-        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        total_revenue = payment_stats['total_revenue']
+        this_month_revenue = payment_stats['this_month_revenue']
+        last_month_revenue = payment_stats['last_month_revenue']
 
         # Revenue change percentage
         if last_month_revenue > 0:
@@ -43,50 +58,59 @@ class OverviewView(APIView):
         else:
             revenue_change = 100 if this_month_revenue > 0 else 0
 
-        # Active clients
-        active_clients = Client.objects.filter(is_active=True).count()
-
-        # Pending invoices
-        pending_invoices = Invoice.objects.filter(
-            payment_status__in=['unpaid', 'partial']
-        ).count()
-        pending_amount = Invoice.objects.filter(
-            payment_status__in=['unpaid', 'partial']
-        ).aggregate(total=Sum('total_amount'))['total'] or Decimal('0')
-
-        # Overdue payments
-        overdue_invoices = Invoice.objects.filter(
-            due_date__lt=today,
-            payment_status__in=['unpaid', 'partial', 'overdue']
-        ).count()
-        overdue_amount = Invoice.objects.filter(
-            due_date__lt=today,
-            payment_status__in=['unpaid', 'partial', 'overdue']
-        ).aggregate(
-            total=Sum('total_amount') - Sum('amount_paid')
+        # OPTIMIZED: Single aggregated query for all invoice metrics (was 4 queries)
+        invoice_stats = Invoice.objects.aggregate(
+            pending_count=Count('id', filter=Q(payment_status__in=['unpaid', 'partial'])),
+            pending_amount=Coalesce(
+                Sum('total_amount', filter=Q(payment_status__in=['unpaid', 'partial'])),
+                Value(Decimal('0'))
+            ),
+            overdue_count=Count('id', filter=Q(
+                due_date__lt=today,
+                payment_status__in=['unpaid', 'partial', 'overdue']
+            )),
+            overdue_total=Coalesce(
+                Sum('total_amount', filter=Q(
+                    due_date__lt=today,
+                    payment_status__in=['unpaid', 'partial', 'overdue']
+                )),
+                Value(Decimal('0'))
+            ),
+            overdue_paid=Coalesce(
+                Sum('amount_paid', filter=Q(
+                    due_date__lt=today,
+                    payment_status__in=['unpaid', 'partial', 'overdue']
+                )),
+                Value(Decimal('0'))
+            ),
+            avg_value=Coalesce(Avg('total_amount'), Value(Decimal('0'))),
         )
-        overdue_total = (overdue_amount.get('total') or Decimal('0'))
 
-        # Projects this month
+        overdue_amount = invoice_stats['overdue_total'] - invoice_stats['overdue_paid']
+
+        # OPTIMIZED: Single query for client and project counts (was 2 queries)
+        active_clients = Client.objects.filter(is_active=True).count()
         projects_this_month = Project.objects.filter(
             created_at__gte=this_month_start
         ).count()
 
-        # Average project value
-        avg_project_value = Invoice.objects.aggregate(avg=Avg('total_amount'))['avg'] or Decimal('0')
-
-        return Response({
+        response_data = {
             'total_revenue': float(total_revenue),
             'this_month_revenue': float(this_month_revenue),
             'revenue_change': float(revenue_change),
             'active_clients': active_clients,
-            'pending_invoices': pending_invoices,
-            'pending_amount': float(pending_amount),
-            'overdue_invoices': overdue_invoices,
-            'overdue_amount': float(overdue_total),
+            'pending_invoices': invoice_stats['pending_count'],
+            'pending_amount': float(invoice_stats['pending_amount']),
+            'overdue_invoices': invoice_stats['overdue_count'],
+            'overdue_amount': float(overdue_amount),
             'projects_this_month': projects_this_month,
-            'avg_project_value': float(avg_project_value),
-        })
+            'avg_project_value': float(invoice_stats['avg_value']),
+        }
+
+        # Cache the response for faster subsequent requests
+        cache.set(cache_key, response_data, CACHE_TIMEOUT)
+
+        return Response(response_data)
 
 
 class RevenueAnalyticsView(APIView):
