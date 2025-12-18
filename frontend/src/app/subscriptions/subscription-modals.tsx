@@ -140,7 +140,7 @@ export function AddSubscriptionModal({
               required
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -169,7 +169,7 @@ export function AddSubscriptionModal({
               placeholder="0.00"
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -189,7 +189,7 @@ export function AddSubscriptionModal({
               placeholder="Leave empty if unlimited"
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -208,7 +208,7 @@ export function AddSubscriptionModal({
               placeholder="Any notes about this subscription..."
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl resize-none',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -227,7 +227,7 @@ export function AddSubscriptionModal({
               onClick={onClose}
               className={cn(
                 'flex-1 px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50 text-foreground font-medium',
+                'bg-muted border border-border/50 text-foreground font-medium',
                 'hover:bg-secondary transition-colors'
               )}
             >
@@ -336,7 +336,7 @@ export function LogUsageModal({
               required
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -361,7 +361,7 @@ export function LogUsageModal({
               required
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -386,7 +386,7 @@ export function LogUsageModal({
                 onChange={(e) => setGenerationType(e.target.value as GenerationType)}
                 className={cn(
                   'w-full px-4 py-2.5 rounded-xl',
-                  'bg-secondary/50 border border-border/50',
+                  'bg-muted border border-border/50',
                   'text-foreground',
                   'focus:outline-none focus:ring-2 focus:ring-primary/20'
                 )}
@@ -410,7 +410,7 @@ export function LogUsageModal({
                 min="1"
                 className={cn(
                   'w-full px-4 py-2.5 rounded-xl',
-                  'bg-secondary/50 border border-border/50',
+                  'bg-muted border border-border/50',
                   'text-foreground',
                   'focus:outline-none focus:ring-2 focus:ring-primary/20'
                 )}
@@ -432,7 +432,7 @@ export function LogUsageModal({
                 placeholder="e.g., 30"
                 className={cn(
                   'w-full px-4 py-2.5 rounded-xl',
-                  'bg-secondary/50 border border-border/50',
+                  'bg-muted border border-border/50',
                   'text-foreground placeholder:text-muted-foreground/60',
                   'focus:outline-none focus:ring-2 focus:ring-primary/20'
                 )}
@@ -453,7 +453,7 @@ export function LogUsageModal({
               placeholder="Leave empty for auto-calculation"
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -472,7 +472,7 @@ export function LogUsageModal({
               placeholder="e.g., Product images for campaign"
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -485,7 +485,7 @@ export function LogUsageModal({
               onClick={onClose}
               className={cn(
                 'flex-1 px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50 text-foreground font-medium',
+                'bg-muted border border-border/50 text-foreground font-medium',
                 'hover:bg-secondary transition-colors'
               )}
             >
@@ -599,7 +599,7 @@ export function EditSubscriptionModal({
             <label className="block text-sm font-medium text-foreground mb-2">
               AI Tool
             </label>
-            <div className="px-4 py-2.5 rounded-xl bg-secondary/30 border border-border/50 text-foreground">
+            <div className="px-4 py-2.5 rounded-xl bg-muted/50 border border-border/50 text-foreground">
               {subscription.tool_name}
             </div>
           </div>
@@ -619,7 +619,7 @@ export function EditSubscriptionModal({
               placeholder="0.00"
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -639,7 +639,7 @@ export function EditSubscriptionModal({
               placeholder="Leave empty if unlimited"
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -658,7 +658,7 @@ export function EditSubscriptionModal({
               placeholder="Any notes about this subscription..."
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl resize-none',
-                'bg-secondary/50 border border-border/50',
+                'bg-muted border border-border/50',
                 'text-foreground placeholder:text-muted-foreground/60',
                 'focus:outline-none focus:ring-2 focus:ring-primary/20'
               )}
@@ -677,7 +677,7 @@ export function EditSubscriptionModal({
               onClick={onClose}
               className={cn(
                 'flex-1 px-4 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50 text-foreground font-medium',
+                'bg-muted border border-border/50 text-foreground font-medium',
                 'hover:bg-secondary transition-colors'
               )}
             >
@@ -767,7 +767,7 @@ export function DeleteSubscriptionModal({
             onClick={onClose}
             className={cn(
               'flex-1 px-4 py-2.5 rounded-xl',
-              'bg-secondary/50 border border-border/50 text-foreground font-medium',
+              'bg-muted border border-border/50 text-foreground font-medium',
               'hover:bg-secondary transition-colors'
             )}
           >

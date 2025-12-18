@@ -218,7 +218,7 @@ export default function NewInvoicePage() {
                     disabled={clientsLoading}
                     className={cn(
                       'w-full pl-11 pr-10 py-3 rounded-xl appearance-none',
-                      'bg-secondary/50 border',
+                      'bg-muted border',
                       'text-foreground',
                       'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                       'transition-all cursor-pointer',
@@ -252,7 +252,7 @@ export default function NewInvoicePage() {
                     disabled={!selectedClientId || projectsLoading}
                     className={cn(
                       'w-full pl-11 pr-10 py-3 rounded-xl appearance-none',
-                      'bg-secondary/50 border',
+                      'bg-muted border',
                       'text-foreground',
                       'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                       'transition-all cursor-pointer',
@@ -290,7 +290,7 @@ export default function NewInvoicePage() {
                   id="due_date"
                   className={cn(
                     'w-full pl-11 pr-4 py-3 rounded-xl',
-                    'bg-secondary/50 border',
+                    'bg-muted border',
                     'text-foreground',
                     'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                     'transition-all',
@@ -350,7 +350,7 @@ export default function NewInvoicePage() {
                         placeholder="Service name or item..."
                         className={cn(
                           'w-full px-4 py-2.5 rounded-xl',
-                          'bg-secondary/50 border',
+                          'bg-muted border',
                           'text-foreground placeholder:text-muted-foreground/60 text-sm',
                           'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                           errors.items?.[index]?.title ? 'border-destructive/50' : 'border-border/50'
@@ -372,7 +372,7 @@ export default function NewInvoicePage() {
                         placeholder="1"
                         className={cn(
                           'w-full px-3 py-2.5 rounded-xl',
-                          'bg-secondary/50 border border-border/50',
+                          'bg-muted border border-border/50',
                           'text-foreground text-sm text-center',
                           'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50'
                         )}
@@ -391,7 +391,7 @@ export default function NewInvoicePage() {
                           placeholder="0.00"
                           className={cn(
                             'w-full pl-12 pr-3 py-2.5 rounded-xl',
-                            'bg-secondary/50 border border-border/50',
+                            'bg-muted border border-border/50',
                             'text-foreground text-sm',
                             'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50'
                           )}
@@ -440,7 +440,7 @@ export default function NewInvoicePage() {
                 placeholder="Payment terms, additional information..."
                 className={cn(
                   'w-full pl-11 pr-4 py-3 rounded-xl',
-                  'bg-secondary/50 border border-border/50',
+                  'bg-muted border border-border/50',
                   'text-foreground placeholder:text-muted-foreground/60',
                   'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                   'transition-all resize-none'
@@ -464,7 +464,7 @@ export default function NewInvoicePage() {
               href="/invoices"
               className={cn(
                 'px-5 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50 text-foreground font-medium text-sm',
+                'bg-muted border border-border/50 text-foreground font-medium text-sm',
                 'hover:bg-secondary hover:border-border transition-colors'
               )}
             >

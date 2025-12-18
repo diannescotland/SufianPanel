@@ -170,7 +170,7 @@ export default function EditProjectPage() {
                   disabled={clientsLoading}
                   className={cn(
                     'w-full pl-11 pr-10 py-3 rounded-xl appearance-none',
-                    'bg-secondary/50 border',
+                    'bg-muted border',
                     'text-foreground',
                     'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                     'transition-all cursor-pointer',
@@ -206,7 +206,7 @@ export default function EditProjectPage() {
                   placeholder="E.g., Product Launch Video"
                   className={cn(
                     'w-full pl-11 pr-4 py-3 rounded-xl',
-                    'bg-secondary/50 border',
+                    'bg-muted border',
                     'text-foreground placeholder:text-muted-foreground/60',
                     'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                     'transition-all',
@@ -237,7 +237,7 @@ export default function EditProjectPage() {
                         'flex items-center gap-3 p-4 rounded-xl border transition-all text-left',
                         isSelected
                           ? type.color + ' border-2'
-                          : 'bg-secondary/30 border-border/50 hover:bg-secondary/50'
+                          : 'bg-muted/50 border-border/50 hover:bg-muted'
                       )}
                     >
                       <Icon className={cn('w-5 h-5', isSelected ? '' : 'text-muted-foreground')} />
@@ -270,7 +270,7 @@ export default function EditProjectPage() {
                   id="deadline"
                   className={cn(
                     'w-full pl-11 pr-4 py-3 rounded-xl',
-                    'bg-secondary/50 border',
+                    'bg-muted border',
                     'text-foreground',
                     'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                     'transition-all',
@@ -297,7 +297,7 @@ export default function EditProjectPage() {
                   placeholder="Describe the project requirements, specifications, and any special instructions..."
                   className={cn(
                     'w-full pl-11 pr-4 py-3 rounded-xl',
-                    'bg-secondary/50 border border-border/50',
+                    'bg-muted border border-border/50',
                     'text-foreground placeholder:text-muted-foreground/60',
                     'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50',
                     'transition-all resize-none'
@@ -323,7 +323,7 @@ export default function EditProjectPage() {
               href={`/projects/${projectId}`}
               className={cn(
                 'px-5 py-2.5 rounded-xl',
-                'bg-secondary/50 border border-border/50 text-foreground font-medium text-sm',
+                'bg-muted border border-border/50 text-foreground font-medium text-sm',
                 'hover:bg-secondary hover:border-border transition-colors'
               )}
             >
