@@ -56,8 +56,8 @@ echo Cela peut prendre 3-5 minutes la premiere fois.
 echo Vous verrez le progres ci-dessous:
 echo.
 
-:: Start containers with plain progress output
-docker compose build --progress=plain
+:: Start containers with plain progress output (no-cache to avoid layer issues)
+docker compose build --progress=plain --no-cache
 if %ERRORLEVEL% NEQ 0 (
     color 0C
     echo.
